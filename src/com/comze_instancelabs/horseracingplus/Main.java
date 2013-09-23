@@ -142,13 +142,7 @@ public class Main extends JavaPlugin implements Listener{
 		if(getConfig().getBoolean("config.use_gambling")){
 			gambling = true;
 		}
-		
-		try {
-            Metrics metrics = new Metrics(this);
-            metrics.start();
-        } catch (IOException e) {
-            // Failed to submit the stats :(
-        }
+
 		
 		ArrayList<String> keys = new ArrayList<String>();
         keys.addAll(getConfig().getKeys(false));
