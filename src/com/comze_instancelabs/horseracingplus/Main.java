@@ -82,6 +82,8 @@ public class Main extends JavaPlugin implements Listener{
 	HashMap<Player, Player> bet_player = new HashMap<Player, Player>(); // player -> player who got bet on
 	HashMap<Player, Integer> bet_amount = new HashMap<Player, Integer>(); // player -> bet amount
 	static HashMap<Player, ItemStack[]> pinv = new HashMap<Player, ItemStack[]>(); // player -> Inventory
+	static HashMap<Player, String> specp = new HashMap<Player, String>(); // playername -> arenaname [SPECTATING]
+
 	
 	@Override
 	public void onEnable(){
@@ -106,6 +108,7 @@ public class Main extends JavaPlugin implements Listener{
 		getConfig().addDefault("shop.jumppotion_price", 50);
 		getConfig().addDefault("shop.speedpotion_price", 150);
 		getConfig().addDefault("shop.barding_price", 100);
+		getConfig().addDefault("config.lastmanstanding", true);
 		
 		
 		getConfig().addDefault("strings.nopermission", "§4You don't have permission!");
@@ -143,6 +146,12 @@ public class Main extends JavaPlugin implements Listener{
 			gambling = true;
 		}
 
+		try {
+			Metrics metrics = new Metrics(this);
+			metrics.start();
+		} catch (IOException e) {
+			// Failed to submit the stats :(
+		}
 		
 		ArrayList<String> keys = new ArrayList<String>();
         keys.addAll(getConfig().getKeys(false));
@@ -166,7 +175,7 @@ public class Main extends JavaPlugin implements Listener{
         }
         
         for(Player p : Bukkit.getOnlinePlayers()){
-	        if(tpthem.containsKey(p)){
+	        if(tpthem.containsKey(p)){ //TODO doesn't work, tpthem is null
 				String arena = tpthem.get(p);
 				final Player p_ = p;
 				final Location t = new Location(Bukkit.getWorld(getConfig().getString(arena + ".lobbyspawn.world")), getConfig().getDouble(arena + ".lobbyspawn.x"), getConfig().getDouble(arena + ".lobbyspawn.y"), getConfig().getDouble(arena + ".lobbyspawn.z"));
@@ -184,6 +193,31 @@ public class Main extends JavaPlugin implements Listener{
         
         as = new ArenaSystem(this);
         
+        
+        for(String p_ : getConfig().getConfigurationSection("tpthem.").getKeys(false)){
+        	if(Bukkit.getOfflinePlayer(p_).isOnline()){
+        		Player p = Bukkit.getPlayer(p_);
+        		String arena = getConfig().getString("tpthem." + p_);
+        		
+        		Double x = getConfig().getDouble(arena + ".lobbyspawn.x");
+    	    	Double y = getConfig().getDouble(arena + ".lobbyspawn.y");
+    	    	Double z = getConfig().getDouble(arena + ".lobbyspawn.z");
+        		World w = Bukkit.getWorld(getConfig().getString(arena + ".lobbyspawn.world"));
+    	    	final Location t = new Location(w, x, y, z);
+    	    	
+    	    	final Player p__ = p;
+    	    	
+    	    	Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
+    				@Override
+    	            public void run() {
+    					p__.teleport(t);
+    				}
+    			}, 20);
+    	    	
+        		getConfig().set("tpthem." + p_, null);
+        		this.saveConfig();
+        	}
+        }
 	}
 	
 	public Plugin getWorldGuard(){
@@ -206,7 +240,43 @@ public class Main extends JavaPlugin implements Listener{
 	
 	@Override
 	public void onDisable(){
-		for(Player p : arenap.keySet()){
+		for(String arena : arenap.values()){
+    		for(Player p2 : this.getKeysByValue(arenap, arena)){
+        		//remove vehicle, remove snowballs, tp away
+    	    	p2.getVehicle().remove();
+    	    	
+    	    	p2.updateInventory();
+    	    	p2.getInventory().setContents(pinv.get(p2));
+    	    	p2.updateInventory();
+    	    	
+    	    	getConfig().set("tpthem." + p2.getName(), arenap.get(p2));
+    	    	this.saveConfig();
+    	    	
+    	    	if(p2.isOnline()){
+	    	    	Location t = as.getLocFromArena(arena, "lobbyspawn");
+	    	    	
+	    	    	p2.teleport(t);
+    	    	}
+    	    	arenap.remove(p2);
+    	    	
+
+    	    	Location b = new Location(Bukkit.getWorld(getConfig().getString(arena + ".sign.world")), getConfig().getDouble(arena + ".sign.x"),getConfig().getDouble(arena + ".sign.y"), getConfig().getDouble(arena + ".sign.z"));
+    	    	Sign s = (Sign)Bukkit.getWorld(getConfig().getString(arena + ".sign.world")).getBlockAt(b).getState();
+    	    	// update sign: 
+                if(s != null && s.getLine(3) != ""){
+                	String d = s.getLine(3).split("/")[0];
+                	int bef = Integer.parseInt(d);
+                	if(bef > 0){
+                		s.setLine(3, Integer.toString(bef - 1) + "/" + Integer.toString(as.getSpawnsFromArena(arena).size()));
+                		s.setLine(2, "§2Join");
+                		s.update();
+                	}
+                }
+    		}
+    	}
+		
+		
+		/*for(Player p : arenap.keySet()){
 			if(p.isInsideVehicle()){
 				p.getVehicle().remove();
 			}
@@ -225,7 +295,7 @@ public class Main extends JavaPlugin implements Listener{
         		s_.setLine(3, Integer.toString(0) + "/" + Integer.toString(as.getSpawnsFromArena(arena).size()));
         		s_.update();
             }
-		}
+		}*/
 		arenap.clear();
 	}
 	
@@ -280,7 +350,7 @@ public class Main extends JavaPlugin implements Listener{
  			    		sender.sendMessage(getConfig().getString("strings.spawn"));
  					}
  				}else if(action.equalsIgnoreCase("setspectate") && args.length > 1){
- 					// setspawn
+ 					// setspectatespawn
  					if(p.hasPermission("horseracing.setspawn")){
  						String arena = args[1];
  			    		Location l = p.getLocation();
@@ -292,12 +362,31 @@ public class Main extends JavaPlugin implements Listener{
  			    		sender.sendMessage("§2Spectator platform successfully created!");
  					}
  				}else if(action.equalsIgnoreCase("spectate") && args.length > 1){
- 					// setspawn
  					if(!args[1].equalsIgnoreCase("") && gamestarted.get(args[1]) && getConfig().isSet(args[1] + ".spectate")){
  						String arena = args[1];
- 			    		Location l = new Location(Bukkit.getWorld(getConfig().getString(args[1] + ".spectate.world")), getConfig().getDouble(args[1] + ".spectate.x"), getConfig().getDouble(args[1] + ".spectate.y"), getConfig().getDouble(args[1] + ".spectate.z"));
- 			    		p.teleport(l);
- 			    		sender.sendMessage("§2You are now spectating in " + args[1]);
+ 						if(getConfig().isSet(args[1] + ".spectate.world")){
+ 							Location l = new Location(Bukkit.getWorld(getConfig().getString(args[1] + ".spectate.world")), getConfig().getDouble(args[1] + ".spectate.x"), getConfig().getDouble(args[1] + ".spectate.y"), getConfig().getDouble(args[1] + ".spectate.z"));
+ 							p.teleport(l);
+ 							specp.put(p, arena);
+ 						}else{
+ 							p.sendMessage("§4This arena doesn't support spectating. Ask an operator to set up a platform by using /hr setspectate [arena].");
+ 						}
+							sender.sendMessage("§2You are now spectating in "
+									+ args[1]
+									+ ". Use §3/hr leavespectate §2to leave the minigame.");
+ 					}else{
+ 						p.sendMessage("§4The game hasn't started yet!");
+ 					}
+ 				}else if(action.equalsIgnoreCase("leavespectate")){
+ 					if(specp.containsKey(p)){
+ 						if(getConfig().isSet(args[1] + ".lobbyspawn.world")){
+ 							String arena = specp.get(p);
+ 							Location l = as.getLocFromArena(arena, "lobbyspawn");
+ 							p.teleport(l);
+ 							specp.remove(p);
+ 						}
+ 					}else{
+ 						p.sendMessage("§4You aren't in spectating mode.");
  					}
  				}else if(action.equalsIgnoreCase("removerace") && args.length > 1){
  					// removearena
@@ -328,7 +417,7 @@ public class Main extends JavaPlugin implements Listener{
  					if(p.hasPermission("horseracing.leave")){
  						if(arenap.containsKey(p)){
  							if(!getConfig().getBoolean("config.arena_cycling")){
-	 							if(p.isInsideVehicle()){
+	 							/*if(p.isInsideVehicle()){
 	 								p.getVehicle().remove();
 	 							}
 	 							final Player p_ = p;
@@ -367,7 +456,8 @@ public class Main extends JavaPlugin implements Listener{
 			                        	}
 		                        	}
 		                        }
-		                        p.getInventory().setContents(pinv.get(p));
+		                        //p.getInventory().setContents(pinv.get(p));*/
+ 								as.playerLeaveEvent(p);
  							}else{ // arena_cycling true ->>
  								if(p.isInsideVehicle()){
 	 								p.getVehicle().remove();
@@ -470,6 +560,7 @@ public class Main extends JavaPlugin implements Listener{
                     		s_.update();
 						}
 						arenaspawn.remove(arena);
+						gamestarted.put(arena, false);
  					}
  				}else if(action.equalsIgnoreCase("join")){
  					if(!getConfig().getBoolean("config.arena_cycling")){
@@ -615,7 +706,61 @@ public class Main extends JavaPlugin implements Listener{
  					}else{
  						sender.sendMessage(getConfig().getString("strings.nopermission"));
  					}
- 				}else if(action.equalsIgnoreCase("leaderboards") || action.equalsIgnoreCase("lb")){
+ 				}else if(action.equalsIgnoreCase("reset") && args.length > 0){
+ 					if(args.length > 1){
+    					if (sender.hasPermission("boatgame.cleararena"))
+    	                {
+	    	    			String arena = args[1];
+	    	    			
+	    	    			if(getConfig().contains(arena)){
+		    	    			// tp players out
+		    	    			for(final Player p_ : arenap.keySet()) {
+		    	    				if(arenap.get(p_).equalsIgnoreCase(arena)){
+		    	    					Double x = getConfig().getDouble(arena + ".lobbyspawn.x");
+		        				    	Double y = getConfig().getDouble(arena + ".lobbyspawn.y");
+		        				    	Double z = getConfig().getDouble(arena + ".lobbyspawn.z");
+		        			    		World w = Bukkit.getWorld(getConfig().getString(arena + ".lobbyspawn.world"));
+		        				    	final Location t = new Location(w, x, y, z);
+		        			    		
+		        				    	if(p_.isInsideVehicle()){
+		        				    		p_.getVehicle().remove();	
+		        				    	}
+		        				    	
+		        				    	Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
+		    	            				@Override
+		    	            	            public void run() {
+		    	            					p_.teleport(t);
+		    	            				}
+		    	            			}, 20);
+
+		        			    		p.sendMessage("§4The arena just got reset by an operator - leaving game..");
+		    	    				}
+		    	    			}
+		    	    			
+		    	    			while (arenap.values().remove(arena));
+		    	    			gamestarted.put(arena, false);
+	        			    	arenaspawn.remove(arena);
+	        			    	
+	        			    	Location b = new Location(Bukkit.getWorld(getConfig().getString(arena + ".sign.world")), getConfig().getDouble(arena + ".sign.x"),getConfig().getDouble(arena + ".sign.y"), getConfig().getDouble(arena + ".sign.z"));
+	        			    	Sign s = (Sign)Bukkit.getWorld(getConfig().getString(arena + ".sign.world")).getBlockAt(b).getState();
+	        			    	// update sign: 
+	        		            if(s != null && s.getLine(3) != ""){
+	    		            		s.setLine(3, Integer.toString(0) + "/" + Integer.toString(as.getSpawnsFromArena(arena).size()));
+	    		            		s.setLine(2, "§2Join");
+	    		            		s.update();
+	    		            		secs_.remove(arena);
+	        		            }
+	        		            sender.sendMessage("§2Arena reset.");	
+	    	    			}else{
+	    	    				sender.sendMessage("§4This arena couldn't be found.");
+	    	    			}
+    	                }else{
+    	                	sender.sendMessage(getConfig().getString("strings.nopermission"));
+    	                }	
+					}else{
+						sender.sendMessage("§4Please provide an arenaname! Usage: /sb reset [name]");
+					}
+				}else if(action.equalsIgnoreCase("leaderboards") || action.equalsIgnoreCase("lb")){
  					ArrayList<String> keys = new ArrayList<String>();
  					boolean cont1 = true;
  					try{
@@ -867,7 +1012,7 @@ public class Main extends JavaPlugin implements Listener{
                     	final Player p = event.getPlayer();
                     	boolean cont1 = true;
                     	
-                    	if(!arena.equalsIgnoreCase("") && getConfig().contains(arena)){               
+                    	if(!arena.equalsIgnoreCase("") && getConfig().contains(arena)){           
                     		if(s.getLine(2).equalsIgnoreCase("§2Starting") || s.getLine(2).equalsIgnoreCase("§2Join")){
     	                		// update sign:
     		                    if(s.getLine(3) != ""){
@@ -916,6 +1061,9 @@ public class Main extends JavaPlugin implements Listener{
                     	
                     	
                     	if(cont1){
+                    		pinv.put(p, p.getInventory().getContents());
+                    		p.getInventory().clear();
+                    		p.updateInventory();
                     		// take money
                     		as.ManageMoney(p, "entry");
                     		
@@ -934,6 +1082,15 @@ public class Main extends JavaPlugin implements Listener{
  		                			as.spawnHorse(t, p);
  		                		}
  		                	}, 20);
+                    	}
+                    	
+                    	//Auto fix: If player rightclicks on a screwed boatgame sign, it "repairs" itself.
+                    	//getLogger().info("ARENAP COUNT: " + Integer.toString(arenap.values().size()));
+                    	// no players in given arena anymore -> update sign
+                    	if(!arenap.values().contains(arena)){
+    	                	s.setLine(2, "§2Join!");
+    	                	s.setLine(3, "0/" + Integer.toString(as.getSpawnsFromArena(arena).size()));
+    	                	s.update();
                     	}
                     }
                 }
@@ -980,6 +1137,15 @@ public class Main extends JavaPlugin implements Listener{
 		}
 	}
 	
+	
+	public static <T, E> T getKeyByValue(Map<T, E> map, E value) {
+        for (Entry<T, E> entry : map.entrySet()) {
+            if (value.equals(entry.getValue())) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
 	
 	public static <T, E> Set<T> getKeysByValue(Map<T, E> map, E value) {
         Set<T> keys = new HashSet<T>();

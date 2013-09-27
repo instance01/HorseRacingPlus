@@ -6,12 +6,14 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import net.milkbowl.vault.economy.EconomyResponse;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
@@ -23,6 +25,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
+import org.bukkit.scheduler.BukkitTask;
 
 import com.comze_instancelabs.horseracingplus.HorseModifier.HorseType;
 import com.comze_instancelabs.horseracingplus.HorseModifier.HorseVariant;
@@ -37,7 +40,7 @@ public class ArenaSystem {
 	}
 	
 	/***
-	 * Gets all Spawns from the arena
+	 * Gets_all Spawns_from the arena
 	 * @param arena The arenaname
 	 * @return Array of spawn strings
 	 */
@@ -53,7 +56,7 @@ public class ArenaSystem {
 	}
 	
 	/***
-	 * Gets the sign from the configuration of the arena
+	 * Gets_the sign from the configuration of the arena
 	 * @param arena The arenaname
 	 * @return Sign
 	 */
@@ -71,7 +74,7 @@ public class ArenaSystem {
 	}
 	
 	/***
-	 * Returns the Location for a specification of an arena
+	 * Returns_the Location for a specification of an arena
 	 * @param arena The arenaname
 	 * @param spec can be lobbyspawn or spawn1, spawn_n ..
 	 * @return Location
@@ -88,11 +91,11 @@ public class ArenaSystem {
 	}
 	
 	/***
-	 * Logs a message to the plugin_log.txt
+	 * Logs_a message to the plugin_log.txt
 	 * @param msg The message to write
 	 */
 	public void logMessage(String msg){
-		File yml = new File("plugins\\HorseRacingPlus\\plugin_log.txt");
+		File yml = new File("plugins/HorseRacingPlus/plugin_log.txt");
         if (!yml.exists()){
         	try {
 				yml.createNewFile();
@@ -149,12 +152,17 @@ public class ArenaSystem {
 	        	s.setLine(2, "§4Ingame");
 	        	s.update();
         	}
+        	for(Player p : main.arenap.keySet()){
+        		if(main.arenap.get(p).equalsIgnoreCase(arena)){
+        			p.playSound(p.getLocation(), Sound.CAT_MEOW, 1, 0);
+        		}
+        	}
         }
 	}
 	
 	
 	/***
-	 * Manages the money of a player
+	 * Manages_the money of a player
 	 * @param p Player
 	 * @param action The action to do: entry, win
 	 * @return True if action could be finished successfully, false if not
@@ -170,7 +178,7 @@ public class ArenaSystem {
 	     				EconomyResponse r = main.econ.withdrawPlayer(p.getName(), main.getConfig().getDouble("config.entry_money"));
 	                     if(!r.transactionSuccess()) {
 	                     	p.sendMessage(String.format("An error occured: %s", r.errorMessage));
-	                         //sender.sendMessage(String.format("You were given %s and now have %s", econ.format(r.amount), econ.format(r.balance)));
+	                         //sender.sendMessage(String.format("You were given %s_and now have %s", econ.format(r.amount), econ.format(r.balance)));
 	                     }
 	 				}
 	 			}
@@ -188,7 +196,7 @@ public class ArenaSystem {
 					EconomyResponse r = main.econ.depositPlayer(p.getName(), main.getConfig().getDouble("config.normal_money_reward"));
         			if(!r.transactionSuccess()) {
                     	p.sendMessage(String.format("An error occured: %s", r.errorMessage));
-                        //sender.sendMessage(String.format("You were given %s and now have %s", econ.format(r.amount), econ.format(r.balance)));
+                        //sender.sendMessage(String.format("You were given %s_and now have %s", econ.format(r.amount), econ.format(r.balance)));
                     }
 				}
 				
@@ -212,7 +220,7 @@ public class ArenaSystem {
 	
 	
 	/***
-	 * Spawns a horse at the given Location and sets the Player as passenger
+	 * Spawns_a horse at the given Location and sets_the Player as_passenger
 	 * @param t Location
 	 * @param p Player
 	 */
@@ -255,19 +263,39 @@ public class ArenaSystem {
 			String arena = main.arenap.get(p);
 			main.arenap.remove(p);
 			main.arenaspawn.remove(arena);
-			p.getVehicle().remove();
+			if(p.isInsideVehicle()){
+				p.getVehicle().remove();	
+			}
 			
 			p.getInventory().setContents(main.pinv.get(p));
+			p.updateInventory();
  			
+			
+			Double x = main.getConfig().getDouble(arena + ".lobbyspawn.x");
+	    	Double y = main.getConfig().getDouble(arena + ".lobbyspawn.y");
+	    	Double z = main.getConfig().getDouble(arena + ".lobbyspawn.z");
+    		World w = Bukkit.getWorld(main.getConfig().getString(arena + ".lobbyspawn.world"));
+	    	
+	    	final Location t_ = new Location(w, x, y, z);
+    		final Player p_ = p;
+	    	
+	    	Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(main, new Runnable() {
+				@Override
+	            public void run() {
+					p_.teleport(t_);
+				}
+			}, 20);
+			
+			
  			Sign s_ = getSignFromArena(arena);
 	    	// update sign:
             if(s_ != null && s_.getLine(3) != ""){
             	String d = s_.getLine(3).split("/")[0];
-            	int bef = Integer.parseInt(d);
-            	if(bef > 0){
+            	Integer bef = Integer.parseInt(d);
+            	if(bef > 1){
             		s_.setLine(3, Integer.toString(bef - 1) + "/" + Integer.toString(getSpawnsFromArena(arena).size()));
             		s_.update();
-            		if(bef == 1){
+            		/*if(bef == 1){
             			if(main.canceltask.get(p) != null){
             				main.getServer().getScheduler().cancelTask(main.canceltask.get(p));
             			}
@@ -277,11 +305,74 @@ public class ArenaSystem {
 							s_.setLine(3, Integer.toString(0) + "/" + Integer.toString(getSpawnsFromArena(arena).size()));
                     		s_.update();
 						}
-                	}
+                	}*/
+            	}
+            	
+            	
+            	if(main.getConfig().getBoolean("config.lastmanstanding")){
+	            	if(bef.equals(2)){ // 1 player left -> other one gets_prize
+	            		s_.setLine(3, Integer.toString(0) + "/" + Integer.toString(getSpawnsFromArena(arena).size()));
+	            		s_.setLine(2, "§2Join");
+	            		s_.update();
+	            		try{
+	            			main.getServer().getScheduler().cancelTask(main.canceltask.get(p));
+	            		}catch(Exception e){
+	            			
+	            		}
+	            		main.gamestarted.put(arena, false);
+	            		main.secs_.remove(arena);
+	            		main.arenaspawn.remove(arena);
+	            		
+	            		final Player last = main.getKeyByValue(main.arenap, arena);
+	            		
+                		if(last != null){
+                    		last.sendMessage("§3You are the last man standing and got a prize! Leave with /hr leave.");
+    	            		
+                    		last.getVehicle().remove();
+    				    	
+                    		last.updateInventory();
+    				    	last.getInventory().setContents(main.pinv.get(last));
+    				    	last.updateInventory();
+    				    	
+    			    		main.arenap.remove(last);
+                    		
+    				    	s_.setLine(2, "§2Join");
+    				    	s_.setLine(3, "0/" + Integer.toString(getSpawnsFromArena(arena).size()));
+    				    	s_.update();
+                    		
+    				    	main.arenaspawn.remove(arena);
+                    		try{
+                				main.getServer().getScheduler().cancelTask(main.canceltask.get(p));
+                    		}catch(Exception e){
+                    			try{
+                    				main.getServer().getScheduler().cancelTask(main.canceltask.get(last));
+                        		}catch(Exception e_){
+                        		}
+                    		}
+                    		main.secs_.remove(arena);
+    				    	
+                    		
+                		}
+	            	}	
+            	}
+            	
+            	if(bef < 2){
+            		s_.setLine(3, Integer.toString(0) + "/" + Integer.toString(getSpawnsFromArena(arena).size()));
+            		s_.setLine(2, "§2Join");
+            		s_.update();
+            		try{
+        				main.getServer().getScheduler().cancelTask(main.canceltask.get(p));
+            		}catch(Exception e){
+            			
+            		}
+            		main.gamestarted.put(arena, false);
+            		main.secs_.remove(arena);
+            		main.arenaspawn.remove(arena);
             	}
             }
 		}
 	}
+
 	
 	
 	public void handleSign(Sign s_, String arena){
