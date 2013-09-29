@@ -28,6 +28,8 @@ import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Boat;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -69,7 +71,7 @@ public class Main extends JavaPlugin implements Listener{
 	
 	static HashMap<Player, String> arenap = new HashMap<Player, String>(); // playername -> arenaname
 	static HashMap<String, Integer> rounds = new HashMap<String, Integer>();
-	static HashMap<Player, String> tpthem = new HashMap<Player, String>(); // playername -> arenaname
+	static HashMap<String, String> tpthem = new HashMap<String, String>(); // playername -> arenaname
 	static HashMap<String, Integer> arenaspawn = new HashMap<String, Integer>(); // arena -> current spawn count
 	static HashMap<String, Boolean> gamestarted = new HashMap<String, Boolean>(); // arena -> game started 
 	static HashMap<String, Integer> secs_ = new HashMap<String, Integer>(); // arena -> Seconds before game starts
@@ -569,75 +571,84 @@ public class Main extends JavaPlugin implements Listener{
 	 						final Player p_ = p;
 	 						boolean cont1 = true;
 	 						
-	 						int size = as.getSpawnsFromArena(arena).size();
+	 						if(validArena(arena)){
+		 						int size = as.getSpawnsFromArena(arena).size();
+		 						
+		 						Sign s_ = as.getSignFromArena(arena);
+						    	// update sign:
+			                    as.handleSign(s_, arena);
+		 						
+		 						final Sign s = s_;
+			                    
+		 						if(s != null && s.getLine(2).equalsIgnoreCase("§2Starting") || s.getLine(2).equalsIgnoreCase("§2Join")){
+			                		// update sign:
+				                    if(s.getLine(3) != ""){
+				                    	String d = s.getLine(3).split("/")[0];
+				                    	int bef = Integer.parseInt(d);
+				                    	
+				                    	//getLogger().info(Integer.toString(bef) + " " + Integer.toString(keys.size()));
+				                    	if(bef < size){
+				                    		if(!arenaspawn.containsKey(arena)){
+				    	                		arenaspawn.put(arena, 1);
+				    	                		pspawn.put(p, 1);
+				    	                	}else{
+				    	                		arenaspawn.put(arena, arenaspawn.get(arena) + 1);
+				    	                		pspawn.put(p, arenaspawn.get(arena));
+				    	                	}
+				                    		s.setLine(3, Integer.toString(bef + 1) + "/" + Integer.toString(size));
+				                    		s.update();
+				                    		if(bef > (getConfig().getInt("config.min_players") - 2)){ // there was one player in there, bef > 0
+				                    			//start the cooldown for start (10 secs)
+				                    			if(!secs_updater.containsKey(arena) && !gamestarted.get(arena)){
+				                    			int id = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+				                    				@Override
+				    	        		            public void run() {	
+					        		                	as.countdownfunc(arena, p_, s);
+				                					}
+				    	        	            }, 20, 20);
+				                    			canceltask.put(p, id);
+				                    			}
+				                    			
+				                    		}
+				                    		
+				                    	}else{
+				                    		cont1 = false;
+				                    	}
+				                    }
+		                		}else{
+		                			cont1 = false;
+		                		}
+		 						
+		 						if(cont1){
+		 							pinv.put(p, p.getInventory().getContents());
+		 							p.getInventory().clear();
+		                    		p.updateInventory();
+		 	                		// take money
+		 	                		if(!as.ManageMoney(p, "entry")){
+		 	                			cont1 = false;
+		 	                		}
+		 	                		
+		 	                		// teleport and spawn horse
+		 		                	arenap.put(p, arena);
+		 		                	
+		 		                	p.sendMessage("§2You have entered a Horse Race!");
+		 		                	
+		 		                	String count = Integer.toString(arenaspawn.get(arena));
+		 		                	
+		 		                	//final Location t = new Location(Bukkit.getWorld(getConfig().getString(arena + ".spawn" + count + ".world")), getConfig().getDouble(arena + ".spawn" + count + ".x"), getConfig().getDouble(arena + ".spawn" + count + ".y"), getConfig().getDouble(arena + ".spawn" + count + ".z"));
+		 		                	final Location t = as.getLocFromArena(arena, "spawn" + count);
+		 		                	p.teleport(t);
+		 		                	Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
+		 		                		public void run(){
+		 		                			as.spawnHorse(t, p_);
+		 		                		}
+		 		                	}, 20);
+		 	                	} 
+	 						}else{
+	 							p.sendMessage("§4This arena is not set up properly!");
+	 						}
 	 						
-	 						Sign s_ = as.getSignFromArena(arena);
-					    	// update sign:
-		                    as.handleSign(s_, arena);
 	 						
-	 						final Sign s = s_;
-		                    
-	 						if(s.getLine(2).equalsIgnoreCase("§2Starting") || s.getLine(2).equalsIgnoreCase("§2Join")){
-		                		// update sign:
-			                    if(s.getLine(3) != ""){
-			                    	String d = s.getLine(3).split("/")[0];
-			                    	int bef = Integer.parseInt(d);
-			                    	
-			                    	//getLogger().info(Integer.toString(bef) + " " + Integer.toString(keys.size()));
-			                    	if(bef < size){
-			                    		if(!arenaspawn.containsKey(arena)){
-			    	                		arenaspawn.put(arena, 1);
-			    	                		pspawn.put(p, 1);
-			    	                	}else{
-			    	                		arenaspawn.put(arena, arenaspawn.get(arena) + 1);
-			    	                		pspawn.put(p, arenaspawn.get(arena));
-			    	                	}
-			                    		s.setLine(3, Integer.toString(bef + 1) + "/" + Integer.toString(size));
-			                    		s.update();
-			                    		if(bef > (getConfig().getInt("config.min_players") - 2)){ // there was one player in there, bef > 0
-			                    			//start the cooldown for start (10 secs)
-			                    			if(!secs_updater.containsKey(arena) && !gamestarted.get(arena)){
-			                    			int id = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
-			                    				@Override
-			    	        		            public void run() {	
-				        		                	as.countdownfunc(arena, p_, s);
-			                					}
-			    	        	            }, 20, 20);
-			                    			canceltask.put(p, id);
-			                    			}
-			                    			
-			                    		}
-			                    		
-			                    	}else{
-			                    		cont1 = false;
-			                    	}
-			                    }
-	                		}else{
-	                			cont1 = false;
-	                		}
-	 						
-	 						if(cont1){
-	 	                		// take money
-	 	                		if(!as.ManageMoney(p, "entry")){
-	 	                			cont1 = false;
-	 	                		}
-	 	                		
-	 	                		// teleport and spawn horse
-	 		                	arenap.put(p, arena);
-	 		                	
-	 		                	p.sendMessage("§2You have entered a Horse Race!");
-	 		                	
-	 		                	String count = Integer.toString(arenaspawn.get(arena));
-	 		                	
-	 		                	//final Location t = new Location(Bukkit.getWorld(getConfig().getString(arena + ".spawn" + count + ".world")), getConfig().getDouble(arena + ".spawn" + count + ".x"), getConfig().getDouble(arena + ".spawn" + count + ".y"), getConfig().getDouble(arena + ".spawn" + count + ".z"));
-	 		                	final Location t = as.getLocFromArena(arena, "spawn" + count);
-	 		                	p.teleport(t);
-	 		                	Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
-	 		                		public void run(){
-	 		                			as.spawnHorse(t, p_);
-	 		                		}
-	 		                	}, 20);
-	 	                	}
 	 					}
  					}
  					
@@ -901,8 +912,8 @@ public class Main extends JavaPlugin implements Listener{
 	
 	@EventHandler
 	public void onPlayerLeave(PlayerQuitEvent event){
+		tpthem.put(event.getPlayer().getName(), arenap.get(event.getPlayer()));
 		as.playerLeaveEvent(event.getPlayer());
-		
 	}
 	
 	@EventHandler
@@ -913,8 +924,9 @@ public class Main extends JavaPlugin implements Listener{
 	
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent event){
-		if(tpthem.containsKey(event.getPlayer())){
-			String arena = tpthem.get(event.getPlayer());
+		getLogger().info(tpthem.get(event.getPlayer().getName()) + " joined");
+		if(tpthem.containsKey(event.getPlayer().getName())){
+			String arena = tpthem.get(event.getPlayer().getName());
 			final Player p = event.getPlayer();
 			final Location t = as.getLocFromArena(arena, "lobbyspawn");
 			p.teleport(t);
@@ -943,6 +955,7 @@ public class Main extends JavaPlugin implements Listener{
                     	final Player p = event.getPlayer();
                     	cyclep.put(p, 0);
                     	boolean cont1 = true;
+                    	
                 		if(s.getLine(2).equalsIgnoreCase("§2Starting") || s.getLine(2).equalsIgnoreCase("§2Join")){
 	                		// update sign:
 		                    if(s.getLine(3) != ""){
@@ -1012,7 +1025,7 @@ public class Main extends JavaPlugin implements Listener{
                     	final Player p = event.getPlayer();
                     	boolean cont1 = true;
                     	
-                    	if(!arena.equalsIgnoreCase("") && getConfig().contains(arena)){           
+                    	if(!arena.equalsIgnoreCase("") && validArena(arena)){           
                     		if(s.getLine(2).equalsIgnoreCase("§2Starting") || s.getLine(2).equalsIgnoreCase("§2Join")){
     	                		// update sign:
     		                    if(s.getLine(3) != ""){
@@ -1035,6 +1048,7 @@ public class Main extends JavaPlugin implements Listener{
     	        		                	as.logMessage("0LOG canceltask " + Integer.toString(canceltask.size()));
     	        		                	as.logMessage("0LOG secs_updater " + Integer.toString(secs_updater.size()));
     		                    			if(!secs_updater.containsKey(arena)){
+    		                    				
     		                    			int id = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
     		                    				@Override
     		    	        		            public void run() {	
@@ -1055,7 +1069,7 @@ public class Main extends JavaPlugin implements Listener{
                     		
     	                	
                     	}else{
-                    		p.sendMessage("§4There's no such arena!");
+                    		p.sendMessage("§4There's no such arena or the arena itself is set up wrong!");
                     		cont1 = false;
                     	}
                     	
@@ -1088,7 +1102,7 @@ public class Main extends JavaPlugin implements Listener{
                     	//getLogger().info("ARENAP COUNT: " + Integer.toString(arenap.values().size()));
                     	// no players in given arena anymore -> update sign
                     	if(!arenap.values().contains(arena)){
-    	                	s.setLine(2, "§2Join!");
+    	                	s.setLine(2, "§2Join");
     	                	s.setLine(3, "0/" + Integer.toString(as.getSpawnsFromArena(arena).size()));
     	                	s.update();
                     	}
@@ -1184,9 +1198,6 @@ public class Main extends JavaPlugin implements Listener{
 		    		}
 	    		}
 			}else if(gamestarted.get(aren)){
-				
-				//TODO: fix:
-				// PLAYER IS NOT IN A HORSE!
 				if(!p.isInsideVehicle()){
 					as.spawnHorse(p.getLocation(), p);
 				}
@@ -1497,7 +1508,17 @@ public class Main extends JavaPlugin implements Listener{
 		                    as.handleSign(s_, aren);
 		                    
 					    	final Location t2 = as.getLocFromArena(aren, "lobbyspawn");
-					    	p.getVehicle().remove();
+					    	if(p.isInsideVehicle()){
+					    		p.getVehicle().remove();
+					    	}
+					    	for(Entity tt : p.getNearbyEntities(50, 50, 50)){
+					    		if(tt instanceof Horse){
+					    			Horse t = (Horse)tt;
+					    			if(t.getPassenger() == null){
+					    				tt.remove();
+					    			}
+					    		}
+					    	}
 					    	String arena = arenap.get(p);
 		                    arenap.remove(p);
 		                    
@@ -1640,6 +1661,15 @@ public class Main extends JavaPlugin implements Listener{
     			event.setCancelled(true);
     		}
     	}
+    }
+    
+    public boolean validArena(String arena){
+    	
+    	if(getConfig().isSet(arena + ".sign") && getConfig().isSet(arena + ".world") && getConfig().isSet(arena + ".finishline") && getConfig().isSet(arena + ".lobbyspawn") && getConfig().isSet(arena + ".spawn1")){
+    		return true;
+    	}
+    	
+    	return false;
     }
 	
 }

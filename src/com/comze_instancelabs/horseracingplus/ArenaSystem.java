@@ -17,6 +17,7 @@ import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
@@ -116,6 +117,7 @@ public class ArenaSystem {
 	
 	public void countdownfunc(String arena, Player p_, Sign s){
 		int secs = main.getConfig().getInt("config.starting_cooldown");
+		
 		if(main.secs_.containsKey(arena)){
 			secs = main.secs_.get(arena);
 		}else{
@@ -259,13 +261,22 @@ public class ArenaSystem {
 	
 	public void playerLeaveEvent(Player p){
 		if(main.arenap.containsKey(p)){
-			main.tpthem.put(p, main.arenap.get(p));
+			//main.tpthem.put(p, main.arenap.get(p));
 			String arena = main.arenap.get(p);
 			main.arenap.remove(p);
 			main.arenaspawn.remove(arena);
+			main.secs_updater.remove(arena);
 			if(p.isInsideVehicle()){
 				p.getVehicle().remove();	
 			}
+			for(Entity tt : p.getNearbyEntities(50, 50, 50)){
+	    		if(tt instanceof Horse){
+	    			Horse t = (Horse)tt;
+	    			if(t.getPassenger() == null){
+	    				tt.remove();
+	    			}
+	    		}
+	    	}
 			
 			p.getInventory().setContents(main.pinv.get(p));
 			p.updateInventory();
