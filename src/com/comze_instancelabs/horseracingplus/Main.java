@@ -177,7 +177,7 @@ public class Main extends JavaPlugin implements Listener{
         }
         
         for(Player p : Bukkit.getOnlinePlayers()){
-	        if(tpthem.containsKey(p)){ //TODO doesn't work, tpthem is null
+	        if(tpthem.containsKey(p)){
 				String arena = tpthem.get(p);
 				final Player p_ = p;
 				final Location t = new Location(Bukkit.getWorld(getConfig().getString(arena + ".lobbyspawn.world")), getConfig().getDouble(arena + ".lobbyspawn.x"), getConfig().getDouble(arena + ".lobbyspawn.y"), getConfig().getDouble(arena + ".lobbyspawn.z"));
@@ -196,30 +196,33 @@ public class Main extends JavaPlugin implements Listener{
         as = new ArenaSystem(this);
         
         
-        for(String p_ : getConfig().getConfigurationSection("tpthem.").getKeys(false)){
-        	if(Bukkit.getOfflinePlayer(p_).isOnline()){
-        		Player p = Bukkit.getPlayer(p_);
-        		String arena = getConfig().getString("tpthem." + p_);
-        		
-        		Double x = getConfig().getDouble(arena + ".lobbyspawn.x");
-    	    	Double y = getConfig().getDouble(arena + ".lobbyspawn.y");
-    	    	Double z = getConfig().getDouble(arena + ".lobbyspawn.z");
-        		World w = Bukkit.getWorld(getConfig().getString(arena + ".lobbyspawn.world"));
-    	    	final Location t = new Location(w, x, y, z);
-    	    	
-    	    	final Player p__ = p;
-    	    	
-    	    	Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
-    				@Override
-    	            public void run() {
-    					p__.teleport(t);
-    				}
-    			}, 20);
-    	    	
-        		getConfig().set("tpthem." + p_, null);
-        		this.saveConfig();
-        	}
+        if(getConfig().contains("tpthem")){
+	        for(String p_ : getConfig().getConfigurationSection("tpthem.").getKeys(false)){
+	        	if(Bukkit.getOfflinePlayer(p_).isOnline()){
+	        		Player p = Bukkit.getPlayer(p_);
+	        		String arena = getConfig().getString("tpthem." + p_);
+	        		
+	        		Double x = getConfig().getDouble(arena + ".lobbyspawn.x");
+	    	    	Double y = getConfig().getDouble(arena + ".lobbyspawn.y");
+	    	    	Double z = getConfig().getDouble(arena + ".lobbyspawn.z");
+	        		World w = Bukkit.getWorld(getConfig().getString(arena + ".lobbyspawn.world"));
+	    	    	final Location t = new Location(w, x, y, z);
+	    	    	
+	    	    	final Player p__ = p;
+	    	    	
+	    	    	Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
+	    				@Override
+	    	            public void run() {
+	    					p__.teleport(t);
+	    				}
+	    			}, 20);
+	    	    	
+	        		getConfig().set("tpthem." + p_, null);
+	        		this.saveConfig();
+	        	}
+	        }	
         }
+        
 	}
 	
 	public Plugin getWorldGuard(){
@@ -416,109 +419,107 @@ public class Main extends JavaPlugin implements Listener{
  					
  				}else if(action.equalsIgnoreCase("leave")){
  					// leave
- 					if(p.hasPermission("horseracing.leave")){
- 						if(arenap.containsKey(p)){
- 							if(!getConfig().getBoolean("config.arena_cycling")){
-	 							/*if(p.isInsideVehicle()){
-	 								p.getVehicle().remove();
-	 							}
-	 							final Player p_ = p;
-		 						String arena = arenap.get(p);
-		 						arenaspawn.remove(arena);
-		 						final Location t = as.getLocFromArena(arena, "lobbyspawn");
-		             			p.teleport(t);
-		             			arenap.remove(p);
-		             			p.sendMessage(getConfig().getString("strings.left"));
-		             			Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
-		            				//int secs = 11;
-		            				@Override
-		            	            public void run() {
-		            					p_.teleport(t);
-		            				}
-		            			}, 20);
-		             			
-		             			Sign s_ = as.getSignFromArena(arena); 
-		    			    	// update sign:
-		                        if(s_ != null && s_.getLine(3) != ""){
-		                        	String d = s_.getLine(3).split("/")[0];
-		                        	int bef = Integer.parseInt(d);
-		                        	if(bef > 0){
-		                        		s_.setLine(3, Integer.toString(bef - 1) + "/" + Integer.toString(as.getSpawnsFromArena(arena).size()));
-		                        		s_.update();
-		                        		if(bef == 1){
-		                        			if(canceltask.get(p) != null){
-			                        			getServer().getScheduler().cancelTask(canceltask.get(p));
-		                        			}
-			                        		s_.setLine(2, "§2Join");
-				                        	s_.update();
-				                        	if(s_ != null){
-												s_.setLine(3, Integer.toString(0) + "/" + Integer.toString(as.getSpawnsFromArena(arena).size()));
-					                    		s_.update();
-											}
-			                        	}
-		                        	}
-		                        }
-		                        //p.getInventory().setContents(pinv.get(p));*/
- 								as.playerLeaveEvent(p);
- 							}else{ // arena_cycling true ->>
- 								if(p.isInsideVehicle()){
-	 								p.getVehicle().remove();
-	 							}
-	 							final Player p_ = p;
-		 						String arena = arenas.get(cyclep.get(p));
-		 						arenaspawn.remove(arena);
-		 						final Location t = as.getLocFromArena(arena, "lobbyspawn");
-		             			p.teleport(t);
-		             			arenap.remove(p);
-		             			p.sendMessage(getConfig().getString("strings.left"));
-		             			Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
-		            				//int secs = 11;
-		            				@Override
-		            	            public void run() {
-		            					p_.teleport(t);
-		            				}
-		            			}, 20);
-		             			
-		             			Sign s_ = as.getSignFromArena("config.cycle"); 
-		    			    	// update sign:
-		                        if(s_ != null && s_.getLine(3) != ""){
-		                        	String d = s_.getLine(3).split("/")[0];
-		                        	int bef = Integer.parseInt(d);
-		                        	if(bef > 0){
-		                        		s_.setLine(3, Integer.toString(bef - 1) + "/" + Integer.toString(as.getSpawnsFromArena(arena).size()));
-		                        		s_.update();
-		                        		if(bef == 1){
-		                        			if(canceltask.get(p) != null){
-			                        			getServer().getScheduler().cancelTask(canceltask.get(p));
-		                        			}
-		                        			for(Player cp : canceltask.keySet()){
-		    		             				if(canceltask.get(cp) != null){
-		    		             					try{
-		    		             						getServer().getScheduler().cancelTask(canceltask.get(p));
-		    		             					}catch(Exception e){
-		    		             						
-		    		             					}
-		    		             				}
-		    		             			}
-			                        		s_.setLine(2, "§2Join");
-				                        	s_.update();
-				                        	if(s_ != null){
-												s_.setLine(3, Integer.toString(0) + "/" + Integer.toString(as.getSpawnsFromArena(arena).size()));
-					                    		s_.update();
-											}
-			                        	}
-		                        	}
-		                        	if(bef < 2){
-			                        	secs_updater.remove(arena);
-				                        secs_.put(arena, getConfig().getInt("config.starting_cooldown"));
-			                        }
-			                        
-		                        }
-		                        p.getInventory().setContents(pinv.get(p));
-		                        //secs_updater.remove(p);
-		                        //secs_updater.clear();
+					if(arenap.containsKey(p)){
+						if(!getConfig().getBoolean("config.arena_cycling")){
+ 							/*if(p.isInsideVehicle()){
+ 								p.getVehicle().remove();
  							}
- 						}
+ 							final Player p_ = p;
+	 						String arena = arenap.get(p);
+	 						arenaspawn.remove(arena);
+	 						final Location t = as.getLocFromArena(arena, "lobbyspawn");
+	             			p.teleport(t);
+	             			arenap.remove(p);
+	             			p.sendMessage(getConfig().getString("strings.left"));
+	             			Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
+	            				//int secs = 11;
+	            				@Override
+	            	            public void run() {
+	            					p_.teleport(t);
+	            				}
+	            			}, 20);
+	             			
+	             			Sign s_ = as.getSignFromArena(arena); 
+	    			    	// update sign:
+	                        if(s_ != null && s_.getLine(3) != ""){
+	                        	String d = s_.getLine(3).split("/")[0];
+	                        	int bef = Integer.parseInt(d);
+	                        	if(bef > 0){
+	                        		s_.setLine(3, Integer.toString(bef - 1) + "/" + Integer.toString(as.getSpawnsFromArena(arena).size()));
+	                        		s_.update();
+	                        		if(bef == 1){
+	                        			if(canceltask.get(p) != null){
+		                        			getServer().getScheduler().cancelTask(canceltask.get(p));
+	                        			}
+		                        		s_.setLine(2, "§2Join");
+			                        	s_.update();
+			                        	if(s_ != null){
+											s_.setLine(3, Integer.toString(0) + "/" + Integer.toString(as.getSpawnsFromArena(arena).size()));
+				                    		s_.update();
+										}
+		                        	}
+	                        	}
+	                        }
+	                        //p.getInventory().setContents(pinv.get(p));*/
+							as.playerLeaveEvent(p);
+						}else{ // arena_cycling true ->>
+							if(p.isInsideVehicle()){
+ 								p.getVehicle().remove();
+ 							}
+ 							final Player p_ = p;
+	 						String arena = arenas.get(cyclep.get(p));
+	 						arenaspawn.remove(arena);
+	 						final Location t = as.getLocFromArena(arena, "lobbyspawn");
+	             			p.teleport(t);
+	             			arenap.remove(p);
+	             			p.sendMessage(getConfig().getString("strings.left"));
+	             			Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
+	            				//int secs = 11;
+	            				@Override
+	            	            public void run() {
+	            					p_.teleport(t);
+	            				}
+	            			}, 20);
+	             			
+	             			Sign s_ = as.getSignFromArena("config.cycle"); 
+	    			    	// update sign:
+	                        if(s_ != null && s_.getLine(3) != ""){
+	                        	String d = s_.getLine(3).split("/")[0];
+	                        	int bef = Integer.parseInt(d);
+	                        	if(bef > 0){
+	                        		s_.setLine(3, Integer.toString(bef - 1) + "/" + Integer.toString(as.getSpawnsFromArena(arena).size()));
+	                        		s_.update();
+	                        		if(bef == 1){
+	                        			if(canceltask.get(p) != null){
+		                        			getServer().getScheduler().cancelTask(canceltask.get(p));
+	                        			}
+	                        			for(Player cp : canceltask.keySet()){
+	    		             				if(canceltask.get(cp) != null){
+	    		             					try{
+	    		             						getServer().getScheduler().cancelTask(canceltask.get(p));
+	    		             					}catch(Exception e){
+	    		             						
+	    		             					}
+	    		             				}
+	    		             			}
+		                        		s_.setLine(2, "§2Join");
+			                        	s_.update();
+			                        	if(s_ != null){
+											s_.setLine(3, Integer.toString(0) + "/" + Integer.toString(as.getSpawnsFromArena(arena).size()));
+				                    		s_.update();
+										}
+		                        	}
+	                        	}
+	                        	if(bef < 2){
+		                        	secs_updater.remove(arena);
+			                        secs_.put(arena, getConfig().getInt("config.starting_cooldown"));
+		                        }
+		                        
+	                        }
+	                        p.getInventory().setContents(pinv.get(p));
+	                        //secs_updater.remove(p);
+	                        //secs_updater.clear();
+						}
  					}
  				}else if(action.equalsIgnoreCase("cancel")){
  					if(args.length > 1){
