@@ -928,15 +928,22 @@ public class Main extends JavaPlugin implements Listener{
 		getLogger().info(tpthem.get(event.getPlayer().getName()) + " joined");
 		if(tpthem.containsKey(event.getPlayer().getName())){
 			String arena = tpthem.get(event.getPlayer().getName());
-			final Player p = event.getPlayer();
-			final Location t = as.getLocFromArena(arena, "lobbyspawn");
-			p.teleport(t);
-			Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
-				@Override
-	            public void run() {
-					p.teleport(t);
-				}
-			}, 20);
+			if(validArena(arena)){
+				final Player p = event.getPlayer();
+				final Location t = as.getLocFromArena(arena, "lobbyspawn");
+				p.teleport(t);
+				Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
+					@Override
+		            public void run() {
+						p.teleport(t);
+					}
+				}, 20);	
+			}else{
+				final Player p = event.getPlayer();
+				p.sendMessage("§4An error occurred while teleporting you back to the lobby.");
+				getLogger().severe("§4Error: Could not find arena while trying to teleport player back to lobby!");
+			}
+			
 		}
 	}
 	
@@ -1046,14 +1053,14 @@ public class Main extends JavaPlugin implements Listener{
     		                    		s.update();
     		                    		if(bef > (getConfig().getInt("config.min_players") - 2)){ // there was one player in there, bef > 0
     		                    			//start the cooldown for start (10 secs)
-    	        		                	as.logMessage("0LOG canceltask " + Integer.toString(canceltask.size()));
-    	        		                	as.logMessage("0LOG secs_updater " + Integer.toString(secs_updater.size()));
+    	        		                	as.logMessage("-0LOG canceltask " + Integer.toString(canceltask.size()));
+    	        		                	as.logMessage("-0LOG secs_updater " + Integer.toString(secs_updater.size()));
     		                    			if(!secs_updater.containsKey(arena)){
     		                    				
     		                    			int id = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
     		                    				@Override
     		    	        		            public void run() {	
-    		                    					as.countdownfunc(arena, p, s);	
+    		                    					as.countdownfunc(arena, p, s);
     		                					}
     		    	        	            }, 20, 20);
     		                    			canceltask.put(event.getPlayer(), id);
