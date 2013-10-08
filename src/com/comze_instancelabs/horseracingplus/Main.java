@@ -940,8 +940,8 @@ public class Main extends JavaPlugin implements Listener{
 				}, 20);	
 			}else{
 				final Player p = event.getPlayer();
-				p.sendMessage("§4An error occurred while teleporting you back to the lobby.");
-				getLogger().severe("§4Error: Could not find arena while trying to teleport player back to lobby!");
+				//p.sendMessage("§4An error occurred while teleporting you back to the lobby.");
+				getLogger().info("§4Error: Could not find arena while trying to teleport player back to lobby!");
 			}
 			
 		}
@@ -1286,7 +1286,7 @@ public class Main extends JavaPlugin implements Listener{
 						}else{
 							final String arena = arenas.get(currentcycle);
 							// tp to lobby of last arena
-							p.sendMessage("§2You won the race!");
+							p.sendMessage(getConfig().getString("strings.won"));
 							if(getConfig().getInt("stats." + p.getName() + ".won") > 0){
 								getConfig().set("stats." + p.getName() + ".won", getConfig().getInt("stats." + p.getName() + ".won") + 1);
 								this.saveConfig();
@@ -1412,20 +1412,13 @@ public class Main extends JavaPlugin implements Listener{
 								getLogger().info("ROUND: " + Integer.toString(round));
 							}else{
 								rounds.put(arena, 0);
-								p.sendMessage("§2You won the race!");
+								p.sendMessage(getConfig().getString("strings.won"));
 								if(getConfig().getInt("stats." + p.getName() + ".won") > 0){
 									getConfig().set("stats." + p.getName() + ".won", getConfig().getInt("stats." + p.getName() + ".won") + 1);
 									this.saveConfig();
 								}else{
 									getConfig().set("stats." + p.getName() + ".won", 1);
 									this.saveConfig();
-								}
-								if(getConfig().getBoolean("config.use_economy")){
-									//give money
-									as.ManageMoney(p, "win");
-								}else{
-									//give item
-									p.getInventory().addItem(new ItemStack(Material.getMaterial(getConfig().getInt("config.itemid")), getConfig().getInt("config.itemamount")));
 								}
 								
 								gamestarted.put(aren, false);
@@ -1450,6 +1443,14 @@ public class Main extends JavaPlugin implements Listener{
 			        			}, 20);
 								
 			                    p.getInventory().setContents(pinv.get(p));
+			                    
+			                    if(getConfig().getBoolean("config.use_economy")){
+									//give money
+									as.ManageMoney(p, "win");
+								}else{
+									//give item
+									p.getInventory().addItem(new ItemStack(Material.getMaterial(getConfig().getInt("config.itemid")), getConfig().getInt("config.itemamount")));
+								}
 			                    
 								ArrayList<Player> arenaplayers = new ArrayList<Player>(getKeysByValue(arenap, arena));
 								for(Player ap : arenaplayers){
@@ -1487,7 +1488,7 @@ public class Main extends JavaPlugin implements Listener{
 								arenaspawn.remove(arena);
 							} // end of if(round < max_round)
 						}else{ // ROUNDS OR NORMAL:
-							p.sendMessage("§2You won the race!");
+							p.sendMessage(getConfig().getString("strings.won"));
 							if(getConfig().getBoolean("config.announce_winner")){
 								getServer().broadcastMessage("§3" + p.getName() + " won a HorseRace!");
 							}
@@ -1497,14 +1498,6 @@ public class Main extends JavaPlugin implements Listener{
 							}else{
 								getConfig().set("stats." + p.getName() + ".won", 1);
 								this.saveConfig();
-							}
-							
-							if(getConfig().getBoolean("config.use_economy")){
-								//give money
-								as.ManageMoney(p, "win");
-							}else{
-								//give item
-								p.getInventory().addItem(new ItemStack(Material.getMaterial(getConfig().getInt("config.itemid")), getConfig().getInt("config.itemamount")));
 							}
 							
 							gamestarted.put(aren, false);
@@ -1540,6 +1533,14 @@ public class Main extends JavaPlugin implements Listener{
 		        			}, 20);
 							
 		                    p.getInventory().setContents(pinv.get(p));
+		                    
+		                    if(getConfig().getBoolean("config.use_economy")){
+								//give money
+								as.ManageMoney(p, "win");
+							}else{
+								//give item
+								p.getInventory().addItem(new ItemStack(Material.getMaterial(getConfig().getInt("config.itemid")), getConfig().getInt("config.itemamount")));
+							}
 		                    
 							ArrayList<Player> arenaplayers = new ArrayList<Player>(getKeysByValue(arenap, arena));
 							for(Player ap : arenaplayers){
