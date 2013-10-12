@@ -925,7 +925,7 @@ public class Main extends JavaPlugin implements Listener{
 	
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent event){
-		getLogger().info(tpthem.get(event.getPlayer().getName()) + " joined");
+		//getLogger().info(tpthem.get(event.getPlayer().getName()) + " joined");
 		if(tpthem.containsKey(event.getPlayer().getName())){
 			String arena = tpthem.get(event.getPlayer().getName());
 			if(validArena(arena)){
@@ -941,7 +941,7 @@ public class Main extends JavaPlugin implements Listener{
 			}else{
 				final Player p = event.getPlayer();
 				//p.sendMessage("§4An error occurred while teleporting you back to the lobby.");
-				getLogger().info("§4Error: Could not find arena while trying to teleport player back to lobby!");
+				//getLogger().info("§4Error: Could not find arena while trying to teleport player back to lobby!");
 			}
 			
 		}
