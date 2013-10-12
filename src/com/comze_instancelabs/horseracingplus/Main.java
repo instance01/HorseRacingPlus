@@ -111,6 +111,7 @@ public class Main extends JavaPlugin implements Listener{
 		getConfig().addDefault("shop.speedpotion_price", 150);
 		getConfig().addDefault("shop.barding_price", 100);
 		getConfig().addDefault("config.lastmanstanding", true);
+		getConfig().addDefault("config.remove_mobs_ingame", true);
 		
 		
 		getConfig().addDefault("strings.nopermission", "§4You don't have permission!");
@@ -1007,6 +1008,24 @@ public class Main extends JavaPlugin implements Listener{
                     	
                     	
                     	if(cont1){
+                    		// clear arena
+                    		boolean removeentities = true;
+					    	removeentities = getConfig().getBoolean("config.remove_mobs_ingame");
+					    	for(Entity tt : p.getNearbyEntities(50, 50, 50)){
+					    		if(tt instanceof Horse){
+					    			Horse t = (Horse)tt;
+					    			if(t.getPassenger() == null){
+					    				tt.remove();
+					    			}
+					    		}else{
+					    			if(removeentities){
+					    				if(tt.getPassenger() == null){
+					    					tt.remove();
+					    				}
+					    			}
+					    		}
+					    	}
+                    		
                     		// take money
                     		as.ManageMoney(p, "entry");
                     		
@@ -1015,7 +1034,7 @@ public class Main extends JavaPlugin implements Listener{
     	                	
     	                	pinv.put(p, p.getInventory().getContents());
     	                	
-    	                	event.getPlayer().sendMessage("§2You have entered a Horse Race!");
+    	                	event.getPlayer().sendMessage("§2You have entered a HorseRace!");
     	                	
     	                	String count = Integer.toString(arenaspawn.get(arena));
     	                	
@@ -1083,6 +1102,24 @@ public class Main extends JavaPlugin implements Listener{
                     	
                     	
                     	if(cont1){
+                    		// clear arena
+                    		boolean removeentities = true;
+					    	removeentities = getConfig().getBoolean("config.remove_mobs_ingame");
+					    	for(Entity tt : p.getNearbyEntities(50, 50, 50)){
+					    		if(tt instanceof Horse){
+					    			Horse t = (Horse)tt;
+					    			if(t.getPassenger() == null){
+					    				tt.remove();
+					    			}
+					    		}else{
+					    			if(removeentities){
+					    				if(tt.getPassenger() == null){
+					    					tt.remove();
+					    				}
+					    			}
+					    		}
+					    	}
+					    	
                     		pinv.put(p, p.getInventory().getContents());
                     		p.getInventory().clear();
                     		p.updateInventory();
@@ -1512,11 +1549,21 @@ public class Main extends JavaPlugin implements Listener{
 					    	if(p.isInsideVehicle()){
 					    		p.getVehicle().remove();
 					    	}
+					    	
+					    	//TODO: test out
+					    	boolean removeentities = true;
+					    	removeentities = getConfig().getBoolean("config.remove_mobs_ingame");
 					    	for(Entity tt : p.getNearbyEntities(50, 50, 50)){
 					    		if(tt instanceof Horse){
 					    			Horse t = (Horse)tt;
 					    			if(t.getPassenger() == null){
 					    				tt.remove();
+					    			}
+					    		}else{
+					    			if(removeentities){
+					    				if(tt.getPassenger() == null){
+					    					tt.remove();
+					    				}
 					    			}
 					    		}
 					    	}
