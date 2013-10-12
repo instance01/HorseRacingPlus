@@ -174,7 +174,8 @@ public class Main extends JavaPlugin implements Listener{
         }
         
         if(getConfig().getBoolean("config.auto_updating")){
-        	Updater updater = new Updater(this, "horse-racing-plus", this.getFile(), Updater.UpdateType.DEFAULT, false);
+        	//Updater updater = new Updater(this, "horse-racing-plus", this.getFile(), Updater.UpdateType.DEFAULT, false);
+        	Updater updater = new Updater(this, 63625, this.getFile(), Updater.UpdateType.DEFAULT, false);
         }
         
         for(Player p : Bukkit.getOnlinePlayers()){
