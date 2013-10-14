@@ -118,6 +118,8 @@ public class ArenaSystem {
 	public void countdownfunc(String arena, Player p_, Sign s){
 		int secs = main.getConfig().getInt("config.starting_cooldown");
 		
+		final Player p__ = p_;
+		
 		if(main.secs_.containsKey(arena)){
 			secs = main.secs_.get(arena);
 		}else{
@@ -163,6 +165,35 @@ public class ArenaSystem {
         			p.playSound(p.getLocation(), Sound.CAT_MEOW, 1, 0);
         		}
         	}
+        	
+			Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(main, new Runnable() {
+				@Override
+	            public void run() {
+        			boolean removeentities = true;
+			    	removeentities = main.getConfig().getBoolean("config.remove_mobs_ingame");
+			    	for(Entity tt : p__.getNearbyEntities(40, 40, 40)){
+			    		if(tt instanceof Horse){
+			    			Horse t = (Horse)tt;
+			    			if(t.getPassenger() == null){
+			    				tt.remove();
+			    			}
+			    		}else{
+			    			if(removeentities){
+		    					if(tt instanceof Horse){
+		    						Horse t = (Horse) tt;
+		    						if(t.getPassenger() == null){
+		    							tt.remove();
+		    						}
+		    					}
+			    				if(tt.getPassenger() == null && tt.getType() != EntityType.HORSE && tt.getType() != EntityType.PLAYER && tt.getType() != EntityType.LEASH_HITCH && tt.getType() != EntityType.ITEM_FRAME && tt.getType() != EntityType.PAINTING){
+			    					tt.remove();
+			    					main.getLogger().severe(tt.getType().toString());
+			    				}
+			    			}
+			    		}
+			    	}		
+				}
+			}, 40);
         }
 	}
 	

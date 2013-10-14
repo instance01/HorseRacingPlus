@@ -29,6 +29,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Boat;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -1008,25 +1009,7 @@ public class Main extends JavaPlugin implements Listener{
                 		}
                     	
                     	
-                    	if(cont1){
-                    		// clear arena
-                    		boolean removeentities = true;
-					    	removeentities = getConfig().getBoolean("config.remove_mobs_ingame");
-					    	for(Entity tt : p.getNearbyEntities(50, 50, 50)){
-					    		if(tt instanceof Horse){
-					    			Horse t = (Horse)tt;
-					    			if(t.getPassenger() == null){
-					    				tt.remove();
-					    			}
-					    		}else{
-					    			if(removeentities){
-					    				if(tt.getPassenger() == null){
-					    					tt.remove();
-					    				}
-					    			}
-					    		}
-					    	}
-                    		
+                    	if(cont1){                    		
                     		// take money
                     		as.ManageMoney(p, "entry");
                     		
@@ -1103,24 +1086,6 @@ public class Main extends JavaPlugin implements Listener{
                     	
                     	
                     	if(cont1){
-                    		// clear arena
-                    		boolean removeentities = true;
-					    	removeentities = getConfig().getBoolean("config.remove_mobs_ingame");
-					    	for(Entity tt : p.getNearbyEntities(50, 50, 50)){
-					    		if(tt instanceof Horse){
-					    			Horse t = (Horse)tt;
-					    			if(t.getPassenger() == null){
-					    				tt.remove();
-					    			}
-					    		}else{
-					    			if(removeentities){
-					    				if(tt.getPassenger() == null){
-					    					tt.remove();
-					    				}
-					    			}
-					    		}
-					    	}
-					    	
                     		pinv.put(p, p.getInventory().getContents());
                     		p.getInventory().clear();
                     		p.updateInventory();
@@ -1551,23 +1516,6 @@ public class Main extends JavaPlugin implements Listener{
 					    		p.getVehicle().remove();
 					    	}
 					    	
-					    	//TODO: test out
-					    	boolean removeentities = true;
-					    	removeentities = getConfig().getBoolean("config.remove_mobs_ingame");
-					    	for(Entity tt : p.getNearbyEntities(50, 50, 50)){
-					    		if(tt instanceof Horse){
-					    			Horse t = (Horse)tt;
-					    			if(t.getPassenger() == null){
-					    				tt.remove();
-					    			}
-					    		}else{
-					    			if(removeentities){
-					    				if(tt.getPassenger() == null){
-					    					tt.remove();
-					    				}
-					    			}
-					    		}
-					    	}
 					    	String arena = arenap.get(p);
 		                    arenap.remove(p);
 		                    
@@ -1625,6 +1573,34 @@ public class Main extends JavaPlugin implements Listener{
 	                    		s_.update();
 							}
 							arenaspawn.remove(arena); 
+							
+							//TODO: test out
+							/*final Location here = p.getLocation();
+							Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
+	            				@Override
+	            	            public void run() {
+			            			boolean removeentities = true;
+							    	removeentities = getConfig().getBoolean("config.remove_mobs_ingame");
+							    	for(Entity tt : p.getNearbyEntities(40, 40, 40)){
+							    		if(tt instanceof Horse){
+							    			Horse t = (Horse)tt;
+							    			if(t.getPassenger() == null){
+							    				tt.remove();
+							    			}
+							    		}else{
+							    			if(removeentities){
+							    				if(removeentities){
+								    				if(tt.getPassenger() == null && tt.getType() != EntityType.ITEM_FRAME && tt.getType() != EntityType.PAINTING){
+								    					tt.remove();
+								    				}
+								    			}
+							    			}
+							    		}
+							    	}		
+	            				}
+	            			}, 20);*/
+							
+					    	
 						} // END OF if(use_round_system){}else{} 
 	
 					} // END OF if (arena_cycling){}else{}
