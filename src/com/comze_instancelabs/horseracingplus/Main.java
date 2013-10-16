@@ -1432,6 +1432,14 @@ public class Main extends JavaPlugin implements Listener{
 						    	// update sign:
 			                    as.handleSign(s_, arena);
 			                    
+			                    if(getConfig().getBoolean("config.use_economy")){
+									//give money
+									as.ManageMoney(p, "win");
+								}else{
+									//give item
+									p.getInventory().addItem(new ItemStack(Material.getMaterial(getConfig().getInt("config.itemid")), getConfig().getInt("config.itemamount")));
+								}
+			                    
 						    	final Location t2 = as.getLocFromArena(arena, "lobbyspawn");
 						    	p.getVehicle().remove();
 			                    arenap.remove(p);
@@ -1446,14 +1454,6 @@ public class Main extends JavaPlugin implements Listener{
 			        			}, 20);
 								
 			                    p.getInventory().setContents(pinv.get(p));
-			                    
-			                    if(getConfig().getBoolean("config.use_economy")){
-									//give money
-									as.ManageMoney(p, "win");
-								}else{
-									//give item
-									p.getInventory().addItem(new ItemStack(Material.getMaterial(getConfig().getInt("config.itemid")), getConfig().getInt("config.itemamount")));
-								}
 			                    
 								ArrayList<Player> arenaplayers = new ArrayList<Player>(getKeysByValue(arenap, arena));
 								for(Player ap : arenaplayers){
@@ -1516,6 +1516,14 @@ public class Main extends JavaPlugin implements Listener{
 					    		p.getVehicle().remove();
 					    	}
 					    	
+					    	if(getConfig().getBoolean("config.use_economy")){
+								//give money
+								as.ManageMoney(p, "win");
+							}else{
+								//give item
+								p.getInventory().addItem(new ItemStack(Material.getMaterial(getConfig().getInt("config.itemid")), getConfig().getInt("config.itemamount")));
+							}
+					    	
 					    	String arena = arenap.get(p);
 		                    arenap.remove(p);
 		                    
@@ -1529,14 +1537,6 @@ public class Main extends JavaPlugin implements Listener{
 		        			}, 20);
 							
 		                    p.getInventory().setContents(pinv.get(p));
-		                    
-		                    if(getConfig().getBoolean("config.use_economy")){
-								//give money
-								as.ManageMoney(p, "win");
-							}else{
-								//give item
-								p.getInventory().addItem(new ItemStack(Material.getMaterial(getConfig().getInt("config.itemid")), getConfig().getInt("config.itemamount")));
-							}
 		                    
 							ArrayList<Player> arenaplayers = new ArrayList<Player>(getKeysByValue(arenap, arena));
 							for(Player ap : arenaplayers){

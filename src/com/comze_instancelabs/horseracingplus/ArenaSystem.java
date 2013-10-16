@@ -205,6 +205,7 @@ public class ArenaSystem {
 	 * @return True if action could be finished successfully, false if not
 	 */
 	public boolean ManageMoney(Player p, String action){
+		main.getLogger().info(p.getName() + " " + action);
 		if(action.equalsIgnoreCase("entry")){
 			if(main.economy){
 	 			if(main.gambling){
@@ -227,7 +228,7 @@ public class ArenaSystem {
 					EconomyResponse r = main.econ.depositPlayer(p.getName(), main.getConfig().getDouble("config.entry_money") * main.arenap.size());
         			if(!r.transactionSuccess()) {
                     	p.sendMessage(String.format("An error occured: %s", r.errorMessage));
-                       return false;
+                    	return false;
                     }
 				}else{
 					EconomyResponse r = main.econ.depositPlayer(p.getName(), main.getConfig().getDouble("config.normal_money_reward"));
