@@ -205,7 +205,6 @@ public class ArenaSystem {
 	 * @return True if action could be finished successfully, false if not
 	 */
 	public boolean ManageMoney(Player p, String action){
-		main.getLogger().info(p.getName() + " " + action);
 		if(action.equalsIgnoreCase("entry")){
 			if(main.economy){
 	 			if(main.gambling){

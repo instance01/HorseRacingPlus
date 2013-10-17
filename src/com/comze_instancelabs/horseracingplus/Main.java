@@ -163,6 +163,7 @@ public class Main extends JavaPlugin implements Listener{
         keys.remove("strings");
         keys.remove("shop");
         keys.remove("stats");
+        keys.remove("tpthem");
         for(int i = 0; i < keys.size(); i++){
             gamestarted.put(keys.get(i), false);
             if(getConfig().getBoolean("config.use_rounds_system")){
@@ -700,6 +701,7 @@ public class Main extends JavaPlugin implements Listener{
     			        	keys.remove("strings");
     			        	keys.remove("shop");
     			        	keys.remove("stats");
+    			        	keys.remove("tpthem");
     			        }catch(Exception e){
     			        	
     			        }
