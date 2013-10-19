@@ -141,7 +141,7 @@ public class ArenaSystem {
 		if(main.secs_updater.containsKey(arena)){
 			logMessage("1LOG secs_updater[0] " + main.secs_updater.get(arena).getName()); // TODO <- Error when cycling twice
 		}else{
-			logMessage("TRIED 1LOG secs_update[0], FOUND NULL!");
+			logMessage("TRIED 1LOG secs_updater[0], FOUND NULL!");
 		}
 		logMessage("1LOG canceltask " + Integer.toString(main.canceltask.size()));
 		logMessage("1LOG secs_updater " + Integer.toString(main.secs_updater.size()));

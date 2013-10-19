@@ -2,6 +2,10 @@ package com.comze_instancelabs.horseracingplus;
 
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -113,6 +117,12 @@ public class Main extends JavaPlugin implements Listener{
 		getConfig().addDefault("shop.barding_price", 100);
 		getConfig().addDefault("config.lastmanstanding", true);
 		getConfig().addDefault("config.remove_mobs_ingame", true);
+		
+		getConfig().addDefault("mysql.enabled", false);
+		getConfig().addDefault("mysql.host", "localhost");
+		getConfig().addDefault("mysql.database", "database");
+		getConfig().addDefault("mysql.user", "root");
+		getConfig().addDefault("mysql.password", "pass");
 		
 		
 		getConfig().addDefault("strings.nopermission", "§4You don't have permission!");
@@ -589,7 +599,15 @@ public class Main extends JavaPlugin implements Listener{
 			                		// update sign:
 				                    if(s.getLine(3) != ""){
 				                    	String d = s.getLine(3).split("/")[0];
-				                    	int bef = Integer.parseInt(d);
+				                    	
+				                    	//int bef = Integer.parseInt(d); 
+				                    	// TODO: above (^) doesnt work, when server lags. Use arenap count:
+				                    	int bef = 0;
+				                    	for(Player p__ : arenap.keySet()){
+				                    		if(arenap.get(p__).equalsIgnoreCase(arena)){
+				                    			bef += 1;
+				                    		}
+				                    	}
 				                    	
 				                    	//getLogger().info(Integer.toString(bef) + " " + Integer.toString(keys.size()));
 				                    	if(bef < size){
@@ -673,7 +691,7 @@ public class Main extends JavaPlugin implements Listener{
 							}
 							if(cont1){
 								if(amount_ < getConfig().getInt("config.max_bet_amount")){
-									//TODO try
+									//TODO Test out
 									if(econ.getBalance(p.getName()) >= amount_){
 	 		                    		EconomyResponse r = econ.withdrawPlayer(p.getName(), amount_);
 		 		  	                    if(!r.transactionSuccess()) {
@@ -713,13 +731,13 @@ public class Main extends JavaPlugin implements Listener{
  					}
  				}else if(action.equalsIgnoreCase("reload")){
  					if(sender.hasPermission("horseracing.reload")){
-	    					this.reloadConfig();
-	    					if(getConfig().getBoolean("config.use_gambling")){
-	    						gambling = true;
-	    					}else{
-	    						gambling = false;
-	    					}
-	    					sender.sendMessage(getConfig().getString("strings.reload"));
+    					this.reloadConfig();
+    					if(getConfig().getBoolean("config.use_gambling")){
+    						gambling = true;
+    					}else{
+    						gambling = false;
+    					}
+    					sender.sendMessage(getConfig().getString("strings.reload"));
  					}else{
  						sender.sendMessage(getConfig().getString("strings.nopermission"));
  					}
@@ -777,7 +795,7 @@ public class Main extends JavaPlugin implements Listener{
 					}else{
 						sender.sendMessage("§4Please provide an arenaname! Usage: /sb reset [name]");
 					}
-				}else if(action.equalsIgnoreCase("leaderboards") || action.equalsIgnoreCase("lb")){
+				}else if(action.equalsIgnoreCase("leaderboards") || action.equalsIgnoreCase("lb") || action.equalsIgnoreCase("stats")){
  					ArrayList<String> keys = new ArrayList<String>();
  					boolean cont1 = true;
  					try{
@@ -1226,6 +1244,7 @@ public class Main extends JavaPlugin implements Listener{
 				Cuboid c = new Cuboid(loc1, loc2);
 				
 				secs_updater.remove(aren);
+				secs_.remove(aren);
 				
 				if(c.containsLoc(loc)){  // CROSSED FINISH LINE
 					if(getConfig().getBoolean("config.arena_cycling")){
@@ -1299,6 +1318,9 @@ public class Main extends JavaPlugin implements Listener{
 								getConfig().set("stats." + p.getName() + ".won", 1);
 								this.saveConfig();
 							}
+							if(getConfig().getBoolean("mysql.enabled")){
+								this.MySQLUpdateStats(p.getName(), "win");
+							}
 							if(getConfig().getBoolean("config.use_economy")){
 								//give money
 								as.ManageMoney(p, "win");
@@ -1342,6 +1364,9 @@ public class Main extends JavaPlugin implements Listener{
 		    			    	}else{
 									getConfig().set("stats." + ap.getName() + ".lost", 1);
 									this.saveConfig();
+								}
+		    			    	if(getConfig().getBoolean("mysql.enabled")){
+									this.MySQLUpdateStats(ap.getName(), "lose");
 								}
 		    			    	arenap.remove(ap);
 		    			    	
@@ -1425,6 +1450,9 @@ public class Main extends JavaPlugin implements Listener{
 									getConfig().set("stats." + p.getName() + ".won", 1);
 									this.saveConfig();
 								}
+								if(getConfig().getBoolean("mysql.enabled")){
+									this.MySQLUpdateStats(p.getName(), "win");
+								}
 								
 								gamestarted.put(aren, false);
 								
@@ -1469,6 +1497,9 @@ public class Main extends JavaPlugin implements Listener{
 										getConfig().set("stats." + ap.getName() + ".lost", 1);
 										this.saveConfig();
 									}
+			    			    	if(getConfig().getBoolean("mysql.enabled")){
+										this.MySQLUpdateStats(ap.getName(), "lose");
+									}
 			    			    	arenap.remove(ap);
 			    			    	
 							    	ap.teleport(t2);
@@ -1503,6 +1534,9 @@ public class Main extends JavaPlugin implements Listener{
 							}else{
 								getConfig().set("stats." + p.getName() + ".won", 1);
 								this.saveConfig();
+							}
+							if(getConfig().getBoolean("mysql.enabled")){
+								this.MySQLUpdateStats(p.getName(), "win");
 							}
 							
 							gamestarted.put(aren, false);
@@ -1548,11 +1582,11 @@ public class Main extends JavaPlugin implements Listener{
 		    			    	
 		    			    	ap.sendMessage(getConfig().getString("strings.lost"));
 		
-		    			    	if(getConfig().getInt("stats." + p.getName() + ".lost") > 0){
-									getConfig().set("stats." + p.getName() + ".lost", getConfig().getInt("stats." + p.getName() + ".lost") + 1);
+		    			    	if(getConfig().getInt("stats." + ap.getName() + ".lost") > 0){
+									getConfig().set("stats." + ap.getName() + ".lost", getConfig().getInt("stats." + ap.getName() + ".lost") + 1);
 									this.saveConfig();
 		    			    	}else{
-									getConfig().set("stats." + p.getName() + ".lost", 1);
+									getConfig().set("stats." + ap.getName() + ".lost", 1);
 									this.saveConfig();
 								}
 		    			    	
@@ -1569,6 +1603,10 @@ public class Main extends JavaPlugin implements Listener{
 						    	
 						    	as.handleSign(s_, aren);
 						    	ap.getInventory().setContents(pinv.get(ap));
+						    	
+						    	if(getConfig().getBoolean("mysql.enabled")){
+									this.MySQLUpdateStats(ap.getName(), "lose");
+								}
 							}
 							if(s_ != null){
 								s_.setLine(3, Integer.toString(0) + "/" + Integer.toString(size));
@@ -1576,7 +1614,6 @@ public class Main extends JavaPlugin implements Listener{
 							}
 							arenaspawn.remove(arena); 
 							
-							//TODO: test out
 							/*final Location here = p.getLocation();
 							Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
 	            				@Override
@@ -1706,5 +1743,50 @@ public class Main extends JavaPlugin implements Listener{
     	
     	return false;
     }
+    
+    
+    
+    //TODO MYSQL
+    /*
+     * TABLE FORMAT:
+     * tablename: horseracing_stats
+     * 
+     * | id | player | win | lose |
+     */
+    /**
+     * Updates HorseRacing Statistics for the provided player
+     * @param player the player to be updated
+     * @param par2 can be win or lose, defines the type of update
+     */
+    public void MySQLUpdateStats(String player, String par2){
+		MySQL MySQL = null;
+    	Connection c = null;
+		
+    	try{
+    		MySQL = new MySQL(getConfig().getString("mysql.host"), "3306", getConfig().getString("mysql.database"), getConfig().getString("mysql.user"), getConfig().getString("mysql.password"));
+    		c = MySQL.open();
+    	}catch(Exception e){
+    		getLogger().severe("Fatal MySQL Error. Are the provided credentials right?");
+    	}
+    	
+    	if(c != null){
+	    	try {
+				ResultSet res_ = c.createStatement().executeQuery("SELECT * FROM horseracing_stats WHERE player='" + player + "'");
+				if(!res_.isBeforeFirst()){
+					c.createStatement().executeUpdate("INSERT INTO horseracing_stats VALUES('0', '" + player + "', '0', '0')");
+				}else{					
+					res_.first();
+					int newscore = res_.getInt(par2) + 1;
+					c.createStatement().executeUpdate("UPDATE horseracing_stats SET win='" + Integer.toString(newscore) + "' WHERE player='" + player + "'");
+				}
+			} catch (SQLException e) {
+				getLogger().severe("Fatal MySQL Error: Did you setup the tables and columns right?");
+			}	
+    	}else{
+    		getLogger().severe("Fatal MySQL Error. Connection appears to be null, are the credentials right?");
+    	}
+		
+	}
 	
+
 }
