@@ -374,7 +374,9 @@ public class ArenaSystem {
                 		if(last != null){
                     		last.sendMessage("§3You are the last man standing and got a prize! Leave with /hr leave.");
     	            		
-                    		last.getVehicle().remove();
+                    		if(last.isInsideVehicle()){
+                    			last.getVehicle().remove();	
+                    		}
     				    	
                     		last.updateInventory();
     				    	last.getInventory().setContents(main.pinv.get(last));
