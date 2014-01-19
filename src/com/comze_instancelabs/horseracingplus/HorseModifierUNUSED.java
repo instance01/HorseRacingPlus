@@ -20,15 +20,15 @@ import org.bukkit.inventory.ItemStack;
 *
 * @author DarkBlade12
 */
-public class HorseModifier {
+public class HorseModifierUNUSED {
     private Object entityHorse;
     private Object nbtTagCompound;
  
     /**
     * Creates a new instance of the HorseModifier, which allows you to change/get values of horses which aren't accessible with the bukkit api atm
     */
-    public HorseModifier(LivingEntity horse) {
-        if (!HorseModifier.isHorse(horse)) {
+    public HorseModifierUNUSED(LivingEntity horse) {
+        if (!HorseModifierUNUSED.isHorse(horse)) {
             throw new IllegalArgumentException("Entity has to be a horse!");
         }
         try {
@@ -42,7 +42,7 @@ public class HorseModifier {
     /**
     * Creates a new instance of the HorseModifier; This constructor is only used for the static spawn method
     */
-    private HorseModifier(Object entityHorse) {
+    private HorseModifierUNUSED(Object entityHorse) {
         this.entityHorse = entityHorse;
         try {
             this.nbtTagCompound = NBTUtil.getNBTTagCompound(entityHorse);
@@ -54,14 +54,14 @@ public class HorseModifier {
     /**
     * Spawns a horse at a given location
     */
-    public static HorseModifier spawn(Location loc) {
+    public static HorseModifierUNUSED spawn(Location loc) {
         World w = loc.getWorld();
         try {
             Object worldServer = ReflectionUtil.getMethod("getHandle", w.getClass(), 0).invoke(w);
             Object entityHorse = ReflectionUtil.getClass("EntityHorse", worldServer);
             ReflectionUtil.getMethod("setPosition", entityHorse.getClass(), 3).invoke(entityHorse, loc.getX(), loc.getY(), loc.getZ());
             ReflectionUtil.getMethod("addEntity", worldServer.getClass(), 1).invoke(worldServer, entityHorse);
-            return new HorseModifier(entityHorse);
+            return new HorseModifierUNUSED(entityHorse);
         } catch (Exception e) {
             e.printStackTrace();
             return null;

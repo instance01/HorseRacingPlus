@@ -20,6 +20,8 @@ import org.bukkit.block.Sign;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
+import org.bukkit.entity.Horse.Style;
+import org.bukkit.entity.Horse.Variant;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -28,8 +30,6 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.bukkit.scheduler.BukkitTask;
 
-import com.comze_instancelabs.horseracingplus.HorseModifier.HorseType;
-import com.comze_instancelabs.horseracingplus.HorseModifier.HorseVariant;
 
 public class ArenaSystem {
 
@@ -262,30 +262,37 @@ public class ArenaSystem {
 	 * @param p Player
 	 */
 	public void spawnHorse(Location t, Player p){
-		HorseModifier hm = HorseModifier.spawn(t);
-     	hm.setType(HorseType.NORMAL);
-     	hm.setVariant(HorseVariant.fromName(main.getConfig().getString("config.horsecolor")));
-     	hm.getHorse().setCustomName(main.getConfig().getString("config.horsename"));
-     	hm.getHorse().setCustomNameVisible(true);
+		Horse hr = (Horse) t.getWorld().spawn(t, Horse.class);
+		hr.setVariant(Variant.HORSE);
+		hr.setCustomName(main.getConfig().getString("config.horsename"));
+		hr.setCustomNameVisible(true);
+		//HorseModifier hm = HorseModifier.spawn(t);
+     	//hm.setType(HorseType.NORMAL);
+     	//hm.setVariant(HorseVariant.fromName(main.getConfig().getString("config.horsecolor")));
+     	//hm.getHorse().setCustomName(main.getConfig().getString("config.horsename"));
+     	//hm.getHorse().setCustomNameVisible(true);
      	int jump = main.getConfig().getInt("shop." + p.getName() + ".jump");
      	int speed = main.getConfig().getInt("shop." + p.getName() + ".speed");
      	boolean barding = main.getConfig().getBoolean("shop." + p.getName() + ".barding");
      	if(jump > 0){
-     		hm.getHorse().addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 200, 1));
+     		//hm.getHorse().addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 200, 1));
+     		hr.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 200, 1));
      		main.getConfig().set("shop." + p.getName() + ".jump", jump - 1);
      	}
      	if(speed > 0){
-     		hm.getHorse().addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 200, 1));
+     		//hm.getHorse().addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 200, 1));
+     		hr.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 200, 1));
      		main.getConfig().set("shop." + p.getName() + ".speed", speed - 1);
      	}
      	if(barding){
-     		Horse h = (Horse)hm.getHorse();
-     		h.setCarryingChest(true);
-     		h.getInventory().setArmor(new ItemStack(Material.DIAMOND_BARDING, 1));
+     		//Horse h = (Horse)hm.getHorse();
+     		hr.setCarryingChest(true);
+     		hr.getInventory().setArmor(new ItemStack(Material.DIAMOND_BARDING, 1));
      	}
-     	hm.setTamed(true);
-     	hm.setSaddled(true);
-     	hm.getHorse().setPassenger(p);
+     	hr.setTamed(true);
+     	hr.getInventory().setSaddle(new ItemStack(Material.SADDLE));
+     	hr.setStyle(Style.valueOf(main.getConfig().getString("config.horsecolor")));
+     	hr.setPassenger(p);
      	
      	
      	//Horse h = p.getWorld().spawn(t, Horse.class);

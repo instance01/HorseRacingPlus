@@ -56,8 +56,8 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
-import com.comze_instancelabs.horseracingplus.HorseModifier.HorseType;
-import com.comze_instancelabs.horseracingplus.HorseModifier.HorseVariant;
+import com.comze_instancelabs.horseracingplus.HorseModifierUNUSED.HorseType;
+import com.comze_instancelabs.horseracingplus.HorseModifierUNUSED.HorseVariant;
 
 /**
  * 
