@@ -209,7 +209,7 @@ public class ArenaSystem {
 			if(main.economy){
 	 			if(main.gambling){
 	     			if(main.econ.getBalance(p.getName()) < 10){
-	 					p.sendMessage(main.getConfig().getString("strings.notenoughmoney"));
+	 					p.sendMessage(main.getConfig().getString("strings.notenoughmoney").replaceAll("&", "§"));
 	 					return false;
 	 				}else{
 	     				EconomyResponse r = main.econ.withdrawPlayer(p.getName(), main.getConfig().getDouble("config.entry_money"));
@@ -385,13 +385,13 @@ public class ArenaSystem {
 	            		
                 		if(last != null){
                     		last.sendMessage("§3You are the last man standing and got a prize! Leave with /hr leave.");
-
+                    		
     	            		Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(main, new Runnable() {
     							@Override
     				            public void run() {
     								last.teleport(t_);
     							}
-    						}, 20);
+    						}, 5);
                     		
                     		if(last.isInsideVehicle()){
                     			last.getVehicle().remove();	

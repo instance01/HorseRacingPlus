@@ -125,24 +125,24 @@ public class Main extends JavaPlugin implements Listener{
 		getConfig().addDefault("mysql.password", "pass");
 		
 		
-		getConfig().addDefault("strings.nopermission", "§4You don't have permission!");
-		getConfig().addDefault("strings.createrace", "§2Race saved. Now create a few spawnpoints and a lobby. :)");
-		getConfig().addDefault("strings.help1", "§2HorseRacing help:");
-		getConfig().addDefault("strings.help2", "§2Use §3'/hr createrace <name>' §2to create a new race.");
-		getConfig().addDefault("strings.help3", "§2Use §3'/hr setlobby <name>' §2to set the lobby for an course.");
-		getConfig().addDefault("strings.help4", "§2Use §3'/hr setspawn <count> <name>' §2to set a new race spawn.");
-		getConfig().addDefault("strings.help5", "§2Use §3'/hr setfinish <name>' §2to set a finish line for the race.");
-		getConfig().addDefault("strings.help6", "§2Use §3'/hr removerace <name>' §2to remove a race.");
-		getConfig().addDefault("strings.lobbycreated", "§2Lobby successfully created!");
-		getConfig().addDefault("strings.spawn", "§2Spawnpoint registered.");
-		getConfig().addDefault("strings.raceremoved", "§4Race removed.");
-		getConfig().addDefault("strings.reload", "§2HorseRacing config successfully reloaded.");
-		getConfig().addDefault("strings.nothing", "§4This command action was not found.");
-		getConfig().addDefault("strings.ingame", "§eYou are not able to use any commands while in a race. You can use /hr leave or /horseracing leave if you want to leave this race.");
-		getConfig().addDefault("strings.left", "§eYou left the race!");
-		getConfig().addDefault("strings.won", "§2You won the race!");
-		getConfig().addDefault("strings.lost", "§4You lost!");
-		getConfig().addDefault("strings.creation", "§2Leftclick the first point and rightclick the second point of the finish line.");
+		getConfig().addDefault("strings.nopermission", "&4You don't have permission!");
+		getConfig().addDefault("strings.createrace", "&2Race saved. Now create a few spawnpoints and a lobby. :)");
+		getConfig().addDefault("strings.help1", "&2HorseRacing help:");
+		getConfig().addDefault("strings.help2", "&2Use &3'/hr createrace <name>' &2to create a new race.");
+		getConfig().addDefault("strings.help3", "&2Use &3'/hr setlobby <name>' &2to set the lobby for an course.");
+		getConfig().addDefault("strings.help4", "&2Use &3'/hr setspawn <count> <name>' &2to set a new race spawn.");
+		getConfig().addDefault("strings.help5", "&2Use &3'/hr setfinish <name>' &2to set a finish line for the race.");
+		getConfig().addDefault("strings.help6", "&2Use &3'/hr removerace <name>' &2to remove a race.");
+		getConfig().addDefault("strings.lobbycreated", "&2Lobby successfully created!");
+		getConfig().addDefault("strings.spawn", "&2Spawnpoint registered.");
+		getConfig().addDefault("strings.raceremoved", "&4Race removed.");
+		getConfig().addDefault("strings.reload", "&2HorseRacing config successfully reloaded.");
+		getConfig().addDefault("strings.nothing", "&4This command action was not found.");
+		getConfig().addDefault("strings.ingame", "&eYou are not able to use any commands while in a race. You can use /hr leave or /horseracing leave if you want to leave this race.");
+		getConfig().addDefault("strings.left", "&eYou left the race!");
+		getConfig().addDefault("strings.won", "&2You won the race!");
+		getConfig().addDefault("strings.lost", "&4You lost!");
+		getConfig().addDefault("strings.creation", "&2Leftclick the first point and rightclick the second point of the finish line.");
 		
 		getConfig().options().copyDefaults(true);
 		this.saveConfig();
@@ -322,12 +322,12 @@ public class Main extends JavaPlugin implements Listener{
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
 		if(cmd.getName().equalsIgnoreCase("hr") || cmd.getName().equalsIgnoreCase("horseracing")){
  		if(args.length < 1){
- 			sender.sendMessage(getConfig().getString("strings.help1"));
- 			sender.sendMessage(getConfig().getString("strings.help2"));
- 			sender.sendMessage(getConfig().getString("strings.help3"));
- 			sender.sendMessage(getConfig().getString("strings.help4"));
- 			sender.sendMessage(getConfig().getString("strings.help5"));
- 			sender.sendMessage(getConfig().getString("strings.help6"));
+ 			sender.sendMessage(getConfig().getString("strings.help1").replaceAll("&", "§"));
+ 			sender.sendMessage(getConfig().getString("strings.help2").replaceAll("&", "§"));
+ 			sender.sendMessage(getConfig().getString("strings.help3").replaceAll("&", "§"));
+ 			sender.sendMessage(getConfig().getString("strings.help4").replaceAll("&", "§"));
+ 			sender.sendMessage(getConfig().getString("strings.help5").replaceAll("&", "§"));
+ 			sender.sendMessage(getConfig().getString("strings.help6").replaceAll("&", "§"));
  		}else{
  			Player p = (Player)sender;
  			if(args.length > 0){
@@ -339,7 +339,7 @@ public class Main extends JavaPlugin implements Listener{
     	    			this.getConfig().set(args[1] + ".world", p.getWorld().getName());
     	    			this.saveConfig();
     	    			String arenaname = args[1];
-    	    			sender.sendMessage(getConfig().getString("strings.createrace"));
+    	    			sender.sendMessage(getConfig().getString("strings.createrace").replaceAll("&", "§"));
     	    			gamestarted.put(args[1], false);
     	    			arenas.add(args[1]);
  					}
@@ -353,7 +353,7 @@ public class Main extends JavaPlugin implements Listener{
     		    		getConfig().set(args[1] + ".lobbyspawn.z", (int)l.getZ());
     		    		getConfig().set(args[1] + ".lobbyspawn.world", p.getWorld().getName());
     		    		this.saveConfig();
-    		    		sender.sendMessage(getConfig().getString("strings.lobbycreated"));
+    		    		sender.sendMessage(getConfig().getString("strings.lobbycreated").replaceAll("&", "§"));
  					}
  				}else if(action.equalsIgnoreCase("setspawn") && args.length > 2){
  					// setspawn
@@ -366,7 +366,7 @@ public class Main extends JavaPlugin implements Listener{
  			    		getConfig().set(args[2] + ".spawn" + count + ".z", (int)l.getZ());
  			    		getConfig().set(args[2] + ".spawn" + count + ".world", p.getWorld().getName());
  			    		this.saveConfig();
- 			    		sender.sendMessage(getConfig().getString("strings.spawn"));
+ 			    		sender.sendMessage(getConfig().getString("strings.spawn").replaceAll("&", "§"));
  					}
  				}else if(action.equalsIgnoreCase("setspectate") && args.length > 1){
  					// setspectatespawn
@@ -390,9 +390,7 @@ public class Main extends JavaPlugin implements Listener{
  						}else{
  							p.sendMessage("§4This arena doesn't support spectating. Ask an operator to set up a platform by using /hr setspectate [arena].");
  						}
-							sender.sendMessage("§2You are now spectating in "
-									+ args[1]
-									+ ". Use §3/hr leavespectate §2to leave the minigame.");
+							sender.sendMessage("§2You are now spectating in " + args[1] + ". Use §3/hr leavespectate §2to leave the minigame.");
  					}else{
  						p.sendMessage("§4The game hasn't started yet!");
  					}
@@ -412,7 +410,7 @@ public class Main extends JavaPlugin implements Listener{
  					if(p.hasPermission("horseracing.remove")){
  						this.getConfig().set(args[1], null);
     	    			this.saveConfig();
-    	    			sender.sendMessage(getConfig().getString("strings.raceremoved"));
+    	    			sender.sendMessage(getConfig().getString("strings.raceremoved").replaceAll("&", "§"));
  					}
  				}else if(action.equalsIgnoreCase("removespawn") && args.length > 2){
  					// removearena
@@ -421,14 +419,14 @@ public class Main extends JavaPlugin implements Listener{
  						String count = args[2];
  						this.getConfig().set(arena + ".spawn" + args[2], null);
     	    			this.saveConfig();
-    	    			sender.sendMessage(getConfig().getString("§4Spawnpoint removed."));
+    	    			sender.sendMessage("§4Spawnpoint removed.");
  					}
  				}else if(action.equalsIgnoreCase("setfinish") && args.length > 1){
  					if(p.hasPermission("horseracing.setfinish")){
 	 					creation.put(p, args[1]);	
 	 					p.getInventory().addItem(new ItemStack(Material.WOOD_SPADE, 1));
 	 					p.updateInventory();
-	 					p.sendMessage(getConfig().getString("strings.creation"));
+	 					p.sendMessage(getConfig().getString("strings.creation").replaceAll("&", "§"));
  					}
  					
  				}else if(action.equalsIgnoreCase("leave")){
@@ -486,7 +484,7 @@ public class Main extends JavaPlugin implements Listener{
 	 						final Location t = as.getLocFromArena(arena, "lobbyspawn");
 	             			p.teleport(t);
 	             			arenap.remove(p);
-	             			p.sendMessage(getConfig().getString("strings.left"));
+	             			p.sendMessage(getConfig().getString("strings.left").replaceAll("&", "§"));
 	             			Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
 	            				//int secs = 11;
 	            				@Override
@@ -738,9 +736,9 @@ public class Main extends JavaPlugin implements Listener{
     					}else{
     						gambling = false;
     					}
-    					sender.sendMessage(getConfig().getString("strings.reload"));
+    					sender.sendMessage(getConfig().getString("strings.reload").replaceAll("&", "§"));
  					}else{
- 						sender.sendMessage(getConfig().getString("strings.nopermission"));
+ 						sender.sendMessage(getConfig().getString("strings.nopermission").replaceAll("&", "§"));
  					}
  				}else if(action.equalsIgnoreCase("reset") && args.length > 0){
  					if(args.length > 1){
@@ -791,7 +789,7 @@ public class Main extends JavaPlugin implements Listener{
 	    	    				sender.sendMessage("§4This arena couldn't be found.");
 	    	    			}
     	                }else{
-    	                	sender.sendMessage(getConfig().getString("strings.nopermission"));
+    	                	sender.sendMessage(getConfig().getString("strings.nopermission").replaceAll("&", "§"));
     	                }	
 					}else{
 						sender.sendMessage("§4Please provide an arenaname! Usage: /sb reset [name]");
@@ -901,7 +899,7 @@ public class Main extends JavaPlugin implements Listener{
 					sender.sendMessage("§2Won games: " + Integer.toString(getConfig().getInt("stats." + pname + ".won")));
 					sender.sendMessage("§2Lost games: " + Integer.toString(getConfig().getInt("stats." + pname + ".lost")));
 				}else{
- 					sender.sendMessage(getConfig().getString("strings.nothing"));
+ 					sender.sendMessage(getConfig().getString("strings.nothing").replaceAll("&", "§"));
  				}
  			}
  		}
@@ -1280,7 +1278,7 @@ public class Main extends JavaPlugin implements Listener{
 								ap.getVehicle().remove();
 								// tp away
 		    			    	if(ap != p){
-		    			    		ap.sendMessage(getConfig().getString("strings.lost"));
+		    			    		ap.sendMessage(getConfig().getString("strings.lost").replaceAll("&", "§"));
 		    			    	}
 		    			    	pspawn.put(ap, countspawn);
 						    	final Player p_ = ap;
@@ -1312,7 +1310,7 @@ public class Main extends JavaPlugin implements Listener{
 						}else{
 							final String arena = arenas.get(currentcycle);
 							// tp to lobby of last arena
-							p.sendMessage(getConfig().getString("strings.won"));
+							p.sendMessage(getConfig().getString("strings.won").replaceAll("&", "§"));
 							if(getConfig().getInt("stats." + p.getName() + ".won") > 0){
 								getConfig().set("stats." + p.getName() + ".won", getConfig().getInt("stats." + p.getName() + ".won") + 1);
 								this.saveConfig();
@@ -1360,7 +1358,7 @@ public class Main extends JavaPlugin implements Listener{
 							ArrayList<Player> arenaplayers = new ArrayList<Player>(getKeysByValue(arenap, arena));
 							for(Player ap : arenaplayers){
 								ap.getVehicle().remove();
-		    			    	ap.sendMessage(getConfig().getString("strings.lost"));
+		    			    	ap.sendMessage(getConfig().getString("strings.lost").replaceAll("&", "§"));
 		    			    	
 		    			    	if(getConfig().getInt("stats." + ap.getName() + ".lost") > 0){
 									getConfig().set("stats." + ap.getName() + ".lost", getConfig().getInt("stats." + ap.getName() + ".lost") + 1);
@@ -1418,7 +1416,7 @@ public class Main extends JavaPlugin implements Listener{
 									ap.getVehicle().remove();
 									// tp away
 			    			    	if(ap != winner){
-			    			    		ap.sendMessage(getConfig().getString("strings.lost"));
+			    			    		ap.sendMessage(getConfig().getString("strings.lost").replaceAll("&", "§"));
 			    			    	}
 							    	final Player p_ = ap;
 							    	final Location t2 = as.getLocFromArena(arena, "spawn" + Integer.toString(countspawn));
@@ -1447,7 +1445,7 @@ public class Main extends JavaPlugin implements Listener{
 								getLogger().info("ROUND: " + Integer.toString(round));
 							}else{
 								rounds.put(arena, 0);
-								p.sendMessage(getConfig().getString("strings.won"));
+								p.sendMessage(getConfig().getString("strings.won").replaceAll("&", "§"));
 								if(getConfig().getInt("stats." + p.getName() + ".won") > 0){
 									getConfig().set("stats." + p.getName() + ".won", getConfig().getInt("stats." + p.getName() + ".won") + 1);
 									this.saveConfig();
@@ -1494,7 +1492,7 @@ public class Main extends JavaPlugin implements Listener{
 								ArrayList<Player> arenaplayers = new ArrayList<Player>(getKeysByValue(arenap, arena));
 								for(Player ap : arenaplayers){
 									ap.getVehicle().remove();
-			    			    	ap.sendMessage(getConfig().getString("strings.lost"));
+			    			    	ap.sendMessage(getConfig().getString("strings.lost").replaceAll("&", "§"));
 			    			    	
 			    			    	if(getConfig().getInt("stats." + ap.getName() + ".lost") > 0){
 										getConfig().set("stats." + ap.getName() + ".lost", getConfig().getInt("stats." + ap.getName() + ".lost") + 1);
@@ -1530,7 +1528,7 @@ public class Main extends JavaPlugin implements Listener{
 								arenaspawn.remove(arena);
 							} // end of if(round < max_round)
 						}else{ // ROUNDS OR NORMAL:
-							p.sendMessage(getConfig().getString("strings.won"));
+							p.sendMessage(getConfig().getString("strings.won").replaceAll("&", "§"));
 							if(getConfig().getBoolean("config.announce_winner")){
 								getServer().broadcastMessage("§3" + p.getName() + " won a HorseRace!");
 							}
@@ -1588,7 +1586,7 @@ public class Main extends JavaPlugin implements Listener{
 								// tp away
 		    			    	arenap.remove(ap);
 		    			    	
-		    			    	ap.sendMessage(getConfig().getString("strings.lost"));
+		    			    	ap.sendMessage(getConfig().getString("strings.lost").replaceAll("&", "§"));
 		
 		    			    	if(getConfig().getInt("stats." + ap.getName() + ".lost") > 0){
 									getConfig().set("stats." + ap.getName() + ".lost", getConfig().getInt("stats." + ap.getName() + ".lost") + 1);
@@ -1665,7 +1663,7 @@ public class Main extends JavaPlugin implements Listener{
 				// nothing
 			}else{
 				event.setCancelled(true);
-				event.getPlayer().sendMessage(getConfig().getString("strings.ingame"));
+				event.getPlayer().sendMessage(getConfig().getString("strings.ingame").replaceAll("&", "§"));
 			}
 		}
 	}
