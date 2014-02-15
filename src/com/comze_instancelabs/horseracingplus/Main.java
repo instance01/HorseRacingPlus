@@ -103,7 +103,7 @@ public class Main extends JavaPlugin implements Listener{
 		getConfig().addDefault("config.min_players", 2);
 		getConfig().addDefault("config.entry_money", 10);
 		getConfig().addDefault("config.starting_cooldown", 10);
-		getConfig().addDefault("config.horsecolor", "BLACK");
+		getConfig().addDefault("config.horsecolor", "WHITE");
 		getConfig().addDefault("config.horsename", "Racehorse");
 		getConfig().addDefault("config.use_rounds_system", false);
 		getConfig().addDefault("config.rounds", 2);
@@ -131,7 +131,7 @@ public class Main extends JavaPlugin implements Listener{
 		getConfig().addDefault("strings.help2", "§2Use §3'/hr createrace <name>' §2to create a new race.");
 		getConfig().addDefault("strings.help3", "§2Use §3'/hr setlobby <name>' §2to set the lobby for an course.");
 		getConfig().addDefault("strings.help4", "§2Use §3'/hr setspawn <count> <name>' §2to set a new race spawn.");
-		getConfig().addDefault("strings.help5", "§2Use §3'/hr finishline <name>' §2to set a finish line for the race.");
+		getConfig().addDefault("strings.help5", "§2Use §3'/hr setfinish <name>' §2to set a finish line for the race.");
 		getConfig().addDefault("strings.help6", "§2Use §3'/hr removerace <name>' §2to remove a race.");
 		getConfig().addDefault("strings.lobbycreated", "§2Lobby successfully created!");
 		getConfig().addDefault("strings.spawn", "§2Spawnpoint registered.");
@@ -720,6 +720,7 @@ public class Main extends JavaPlugin implements Listener{
     			        	keys.remove("shop");
     			        	keys.remove("stats");
     			        	keys.remove("tpthem");
+    			        	keys.remove("mysql");
     			        }catch(Exception e){
     			        	
     			        }
@@ -1129,10 +1130,10 @@ public class Main extends JavaPlugin implements Listener{
  		                	}, 20);
                     	}
                     	
-                    	//Auto fix: If player rightclicks on a screwed boatgame sign, it "repairs" itself.
+                    	//Auto fix: If player rightclicks on a screwed horseracing sign, it "repairs" itself.
                     	//getLogger().info("ARENAP COUNT: " + Integer.toString(arenap.values().size()));
                     	// no players in given arena anymore -> update sign
-                    	if(!arenap.values().contains(arena)){
+                    	if(!arenap.values().contains(arena) && validArena(arena)){
     	                	s.setLine(2, "§2Join");
     	                	s.setLine(3, "0/" + Integer.toString(as.getSpawnsFromArena(arena).size()));
     	                	s.update();

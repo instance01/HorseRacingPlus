@@ -291,7 +291,12 @@ public class ArenaSystem {
      	}
      	hr.setTamed(true);
      	hr.getInventory().setSaddle(new ItemStack(Material.SADDLE));
-     	hr.setStyle(Style.valueOf(main.getConfig().getString("config.horsecolor")));
+     	String style = main.getConfig().getString("config.horsecolor");
+     	if(!style.equalsIgnoreCase("WHITE") && !style.equalsIgnoreCase("BLACK_DOTS") && !style.equalsIgnoreCase("WHITE_DOTS") && !style.equalsIgnoreCase("WHITEFIELD") && !style.equalsIgnoreCase("NONE")){
+     		main.getLogger().warning("Horse Style not found.");
+     	}else{
+         	hr.setStyle(Style.valueOf(main.getConfig().getString("config.horsecolor")));
+     	}
      	hr.setPassenger(p);
      	
      	
@@ -380,7 +385,14 @@ public class ArenaSystem {
 	            		
                 		if(last != null){
                     		last.sendMessage("§3You are the last man standing and got a prize! Leave with /hr leave.");
-    	            		
+
+    	            		Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(main, new Runnable() {
+    							@Override
+    				            public void run() {
+    								last.teleport(t_);
+    							}
+    						}, 20);
+                    		
                     		if(last.isInsideVehicle()){
                     			last.getVehicle().remove();	
                     		}
@@ -390,7 +402,7 @@ public class ArenaSystem {
     				    	last.updateInventory();
     				    	
     			    		main.arenap.remove(last);
-                    		
+    			    		
     				    	s_.setLine(2, "§2Join");
     				    	s_.setLine(3, "0/" + Integer.toString(getSpawnsFromArena(arena).size()));
     				    	s_.update();
