@@ -143,7 +143,8 @@ public class Main extends JavaPlugin implements Listener{
 		getConfig().addDefault("strings.won", "&2You won the race!");
 		getConfig().addDefault("strings.lost", "&4You lost!");
 		getConfig().addDefault("strings.creation", "&2Leftclick the first point and rightclick the second point of the finish line.");
-		
+		getConfig().addDefault("strings.notenoughmoney", "&cYou don't have enough money to join this race!");
+	
 		getConfig().options().copyDefaults(true);
 		this.saveConfig();
 		
@@ -356,6 +357,9 @@ public class Main extends JavaPlugin implements Listener{
     		    		getConfig().set(args[1] + ".lobbyspawn.y", (int)l.getY());
     		    		getConfig().set(args[1] + ".lobbyspawn.z", (int)l.getZ());
     		    		getConfig().set(args[1] + ".lobbyspawn.world", p.getWorld().getName());
+    		    		getConfig().set(args[1] + ".lobbyspawn.pitch", l.getPitch());
+ 			    		getConfig().set(args[1] + ".lobbyspawn.yaw", l.getYaw());
+ 			    		
     		    		this.saveConfig();
     		    		sender.sendMessage(getConfig().getString("strings.lobbycreated").replaceAll("&", "§"));
  					}

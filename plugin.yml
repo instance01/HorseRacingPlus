@@ -1,6 +1,6 @@
 name: HorseRacingPlus
 main: com.comze_instancelabs.horseracingplus.Main
-version: 1.4
+version: 1.4.1
 author: instancelabs
 permissions:
   horseracing.createrace:
