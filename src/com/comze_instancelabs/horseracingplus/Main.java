@@ -329,6 +329,10 @@ public class Main extends JavaPlugin implements Listener{
  			sender.sendMessage(getConfig().getString("strings.help5").replaceAll("&", "§"));
  			sender.sendMessage(getConfig().getString("strings.help6").replaceAll("&", "§"));
  		}else{
+ 			if(!(sender instanceof Player)){
+ 				sender.sendMessage("§cYou need to be a player to execute this command.");
+ 				return true;
+ 			}
  			Player p = (Player)sender;
  			if(args.length > 0){
  				String action = args[0];
@@ -365,6 +369,9 @@ public class Main extends JavaPlugin implements Listener{
  			    		getConfig().set(args[2] + ".spawn" + count + ".y", (int)l.getY());
  			    		getConfig().set(args[2] + ".spawn" + count + ".z", (int)l.getZ());
  			    		getConfig().set(args[2] + ".spawn" + count + ".world", p.getWorld().getName());
+ 			    		getConfig().set(args[2] + ".spawn" + count + ".pitch", l.getPitch());
+ 			    		getConfig().set(args[2] + ".spawn" + count + ".yaw", l.getYaw());
+ 			    		
  			    		this.saveConfig();
  			    		sender.sendMessage(getConfig().getString("strings.spawn").replaceAll("&", "§"));
  					}
@@ -1099,7 +1106,7 @@ public class Main extends JavaPlugin implements Listener{
                     		
     	                	
                     	}else{
-                    		p.sendMessage("§4There's no such arena or the arena itself is set up wrong!");
+                    		p.sendMessage("§4There's no such arena or the arena itself is set up wrong (missing components or sign)!");
                     		cont1 = false;
                     	}
                     	

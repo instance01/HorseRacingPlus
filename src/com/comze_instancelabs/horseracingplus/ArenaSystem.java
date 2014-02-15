@@ -85,8 +85,21 @@ public class ArenaSystem {
 		Double x = main.getConfig().getDouble(arena + "." + spec + ".x");
     	Double y = main.getConfig().getDouble(arena + "." + spec + ".y");
     	Double z = main.getConfig().getDouble(arena + "." + spec + ".z");
+    	Float pitch = 0F;
+    	Float yaw  = 0F;
+    	boolean py = false;
+    	if(main.getConfig().isSet(arena + "." + spec + ".pitch")){
+    		py = true;
+    		pitch = (float)main.getConfig().getDouble(arena + "." + spec + ".pitch");
+        	yaw = (float)main.getConfig().getDouble(arena + "." + spec + ".yaw");
+    	}
     	World w = Bukkit.getWorld(main.getConfig().getString(arena + "." + spec + ".world"));
-    	Location l = new Location(w, x, y, z);
+    	Location l = null;
+    	if(py){
+    		l = new Location(w, x, y, z, yaw, pitch);
+    	}else{
+    		l = new Location(w, x, y, z);
+    	}
     	
 		return l;
 	}
