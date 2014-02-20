@@ -166,9 +166,13 @@ public class ArenaSystem {
         	logMessage("2LOG canceltask " + Integer.toString(main.canceltask.size()));
         	logMessage("2LOG secs_updater " + Integer.toString(main.secs_updater.size()));
         	
-        	main.secs_.remove(arena);        	
-        	main.getServer().getScheduler().cancelTask(main.canceltask.get(p_));
-        	main.canceltask.remove(p_);
+        	main.secs_.remove(arena);
+        	if(main.canceltask.containsKey(p_)){
+            	main.getServer().getScheduler().cancelTask(main.canceltask.get(p_));
+            	main.canceltask.remove(p_);
+        	}else{
+        		main.getServer().getScheduler().cancelAllTasks();
+        	}
         	if(s != null){
 	        	s.setLine(2, "§4Ingame");
 	        	s.update();
